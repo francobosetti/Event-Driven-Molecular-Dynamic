@@ -16,12 +16,12 @@ public class TwoParticleEvent extends Event{
         this.collisionCountB = collisionCountB;
     }
 
-    // return the first particle, possibly null.
+    // return the first particle
     public Particle getParticle1() {
         return a;
     }
 
-    // return the second particle, possibly null.
+    // return the second particle
     public Particle getParticle2() {
         return b;
     }

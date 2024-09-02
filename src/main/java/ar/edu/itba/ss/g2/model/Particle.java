@@ -42,9 +42,7 @@ public class Particle {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    /*
-         update the invoking particle to simulate it bouncing off a vertical wall
-     */
+    // update the invoking particle to simulate it bouncing off a vertical wall
     public void bounceX() {
         vx = -vx;
     }
