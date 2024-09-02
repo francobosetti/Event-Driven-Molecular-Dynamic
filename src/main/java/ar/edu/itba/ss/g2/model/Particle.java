@@ -57,9 +57,53 @@ public class Particle {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
+    public Double getX() {
+        return x;
+    }
+
+    public Double getY() {
+        return y;
+    }
+
+    public Double getVx() {
+        return vx;
+    }
+
+    public Double getVy() {
+        return vy;
+    }
+
+    public Double getMass() {
+        return mass;
+    }
+
+    public Double getRadius() {
+        return radius;
+    }
+
+    public void setX(Double x) {
+        this.x = x;
+    }
+
+    public void setY(Double y) {
+        this.y = y;
+    }
+
+    public void setVx(Double vx) {
+        this.vx = vx;
+    }
+
+    public void setVy(Double vy) {
+        this.vy = vy;
+    }
+
     // return the total number of collisions involving this particle.
     public int getCollisionCount() {
         return collisionCount;
+    }
+
+    public void incrementCollisionCount() {
+        collisionCount++;
     }
 
     @Override
