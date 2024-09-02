@@ -9,12 +9,12 @@ public class TwoParticleEvent extends Event {
     private final int collisionCountB;
 
     public TwoParticleEvent(
-            double time, Particle a, int collisionCountA, Particle b, int collisionCountB) {
+            double time, Particle a, Particle b) {
         super(time);
         this.a = a;
-        this.collisionCountA = collisionCountA;
+        this.collisionCountA = a.getCollisionCount();
         this.b = b;
-        this.collisionCountB = collisionCountB;
+        this.collisionCountB = b.getCollisionCount();
     }
 
     // return the first particle
