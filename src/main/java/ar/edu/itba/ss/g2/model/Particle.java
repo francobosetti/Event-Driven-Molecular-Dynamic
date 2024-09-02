@@ -7,8 +7,8 @@ public class Particle {
     private Double vx;
     private Double vy;
 
-    private Double mass;
-    private Double radius;
+    private final Double mass;
+    private final Double radius;
 
     private int collisionCount;
 
@@ -19,9 +19,7 @@ public class Particle {
         this.vy = vy;
         this.mass = mass;
         this.radius = radius;
-    }
-
-    public Particle() {
+        this.collisionCount = 0;
     }
 
     // return the duration of time until the invoking particle collides with a vertical wall,
