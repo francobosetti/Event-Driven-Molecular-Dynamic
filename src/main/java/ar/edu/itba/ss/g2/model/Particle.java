@@ -15,6 +15,7 @@ public class Particle {
     private int collisionCount;
 
     public Particle(int id, Double x, Double y, Double vx, Double vy, Double mass, Double radius) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.vx = vx;
