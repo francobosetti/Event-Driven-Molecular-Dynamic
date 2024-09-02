@@ -34,7 +34,7 @@ public class SquareParticleGenerator extends ParticleGenerator {
             double vx = initialVelocity * Math.cos(velocityAngle);
             double vy = initialVelocity * Math.sin(velocityAngle);
 
-            particles.add(new Particle(x, y, vx, vy, particleRadius, particleMass));
+            particles.add(new Particle(i, x, y, vx, vy, particleRadius, particleMass));
         }
 
         return particles;

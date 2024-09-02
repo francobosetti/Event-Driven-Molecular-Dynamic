@@ -1,6 +1,8 @@
 package ar.edu.itba.ss.g2.model;
 
 public class Particle {
+    private int id;
+
     private Double x;
     private Double y;
 
@@ -12,7 +14,7 @@ public class Particle {
 
     private int collisionCount;
 
-    public Particle(Double x, Double y, Double vx, Double vy, Double mass, Double radius) {
+    public Particle(int id, Double x, Double y, Double vx, Double vy, Double mass, Double radius) {
         this.x = x;
         this.y = y;
         this.vx = vx;
@@ -63,6 +65,7 @@ public class Particle {
     @Override
     public String toString() {
         return "Particle{" +
+                "id=" + id +
                 "x=" + x +
                 ", y=" + y +
                 ", vx=" + vx +
@@ -71,5 +74,17 @@ public class Particle {
                 ", radius=" + radius +
                 ", collisionCount=" + collisionCount +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Particle particle)) return false;
+        return this.id == particle.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 }

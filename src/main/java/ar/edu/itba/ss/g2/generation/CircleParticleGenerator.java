@@ -38,7 +38,7 @@ public class CircleParticleGenerator extends ParticleGenerator {
             double vx = initialVelocity * Math.cos(velocityAngle);
             double vy = initialVelocity * Math.sin(velocityAngle);
 
-            particles.add(new Particle(x, y, vx, vy, particleMass, particleRadius));
+            particles.add(new Particle(i, x, y, vx, vy, particleMass, particleRadius));
 
         }
 
