@@ -145,6 +145,8 @@ public class ArgParser {
                 return null;
             }
 
+            builder.particleCount(N);
+
             double r;
 
             try {
@@ -158,6 +160,8 @@ public class ArgParser {
                 System.err.println("Particle radius must be greater than 0");
                 return null;
             }
+
+            builder.particleRadius(r);
 
             double m;
 
@@ -173,6 +177,8 @@ public class ArgParser {
                 return null;
             }
 
+            builder.particleMass(m);
+
             double v;
 
             try {
@@ -186,6 +192,8 @@ public class ArgParser {
                 System.err.println("Initial velocity must be greater or equal to 0");
                 return null;
             }
+
+            builder.initialVelocity(v);
 
             if (cmd.hasOption("s")) {
                 long seed;
