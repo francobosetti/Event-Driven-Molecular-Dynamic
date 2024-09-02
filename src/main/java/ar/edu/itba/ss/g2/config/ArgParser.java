@@ -8,7 +8,28 @@ import java.util.List;
 public class ArgParser {
 
     private static final List<Option> OPTIONS =
-            List.of();
+            List.of(
+                    new Option("h", "help", false, "Print this message"),
+                    new Option("out", "output", true, "Output directory"),
+
+                    // Simulation domain
+                    new Option("d", "domain", true, "Domain type square|circular"),
+                    new Option("sz", "size", true, "Domain side(square) or radius(circular)"),
+
+                    // Particles
+                    new Option("N", "particles", true, "Number of particles"),
+                    new Option("r", "radius", true, "Particle radius"),
+                    new Option("m", "mass", true, "Particle mass"),
+                    new Option("v", "velocity", true, "Initial velocity"),
+                    new Option("s", "seed", true, "Random seed"),
+
+                    // Obstacle
+                    new Option("obs", "obstacle", true, "Obstacle type free|fixed"),
+                    new Option("or", "obstacle-radius", true, "Obstacle radius"),
+                    new Option("om", "obstacle-mass", true, "Obstacle mass"),
+
+                    // Simulation
+                    new Option("t", "time", true, "Max simulation time"));
 
     private final String[] args;
     private final Options options;
@@ -40,8 +61,205 @@ public class ArgParser {
 
         Configuration.Builder builder = new Configuration.Builder();
 
+        // Output directory
+        if (cmd.hasOption("out")) {
+            builder.outputDirectory(cmd.getOptionValue("out"));
+        } else {
+            System.err.println("Output directory is required");
+            return null;
+        }
 
+        // Max simulation time
+        if (cmd.hasOption("t")) {
 
+            double maxTime;
+
+            try {
+                maxTime = Double.parseDouble(cmd.getOptionValue("t"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid max simulation time: " + cmd.getOptionValue("t"));
+                return null;
+            }
+
+            if (maxTime <= 0) {
+                System.err.println("Max simulation time must be greater than 0");
+                return null;
+            }
+
+        } else {
+            System.err.println("Max simulation time is required");
+            return null;
+        }
+
+        // Simulation Domain
+        if (cmd.hasOption("d") && cmd.hasOption("sz")) {
+
+            String domainType = cmd.getOptionValue("d");
+
+            if (!domainType.equals("square") && !domainType.equals("circular")) {
+                System.err.println("Invalid domain type: " + domainType);
+                return null;
+            }
+
+            boolean isCircular = domainType.equals("circular");
+
+            double size;
+
+            try {
+                size = Double.parseDouble(cmd.getOptionValue("sz"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid domain size: " + cmd.getOptionValue("sz"));
+                return null;
+            }
+
+            if (size <= 0) {
+                System.err.println("Domain size must be greater than 0");
+                return null;
+            }
+
+            if (isCircular) {
+                builder.circularDomain(size);
+            } else {
+                builder.squareDomain(size);
+            }
+
+        } else {
+            System.err.println("Domain type and size are required");
+            return null;
+        }
+
+        // Particles
+        if (cmd.hasOption("N") && cmd.hasOption("r") && cmd.hasOption("m") && cmd.hasOption("v")) {
+
+            int N;
+
+            try {
+                N = Integer.parseInt(cmd.getOptionValue("N"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid number of particles: " + cmd.getOptionValue("N"));
+                return null;
+            }
+
+            if (N <= 0) {
+                System.err.println("Number of particles must be greater than 0");
+                return null;
+            }
+
+            double r;
+
+            try {
+                r = Double.parseDouble(cmd.getOptionValue("r"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid particle radius: " + cmd.getOptionValue("r"));
+                return null;
+            }
+
+            if (r <= 0) {
+                System.err.println("Particle radius must be greater than 0");
+                return null;
+            }
+
+            double m;
+
+            try {
+                m = Double.parseDouble(cmd.getOptionValue("m"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid particle mass: " + cmd.getOptionValue("m"));
+                return null;
+            }
+
+            if (m <= 0) {
+                System.err.println("Particle mass must be greater than 0");
+                return null;
+            }
+
+            double v;
+
+            try {
+                v = Double.parseDouble(cmd.getOptionValue("v"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid initial velocity: " + cmd.getOptionValue("v"));
+                return null;
+            }
+
+            if (v < 0) {
+                System.err.println("Initial velocity must be greater or equal to 0");
+                return null;
+            }
+
+            if (cmd.hasOption("s")) {
+                long seed;
+
+                try {
+                    seed = Long.parseLong(cmd.getOptionValue("s"));
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid seed: " + cmd.getOptionValue("s"));
+                    return null;
+                }
+
+                builder.seed(seed);
+            }
+
+        } else {
+            System.err.println("Particle parameters are required: N, r, m, v");
+            return null;
+        }
+
+        // Obstacle
+        if (cmd.hasOption("obs") && cmd.hasOption("or")) {
+
+            String obstacleType = cmd.getOptionValue("obs");
+
+            if (!obstacleType.equals("free") && !obstacleType.equals("fixed")) {
+                System.err.println("Invalid obstacle type: " + obstacleType);
+                return null;
+            }
+
+            boolean isObstacleFree = obstacleType.equals("free");
+
+            double or;
+
+            try {
+                or = Double.parseDouble(cmd.getOptionValue("or"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid obstacle radius: " + cmd.getOptionValue("or"));
+                return null;
+            }
+
+            if (or <= 0) {
+                System.err.println("Obstacle radius must be greater than 0");
+                return null;
+            }
+
+            if (isObstacleFree) {
+
+                if (!cmd.hasOption("om")) {
+                    System.err.println("Obstacle mass is required");
+                    return null;
+                }
+
+                double om;
+
+                try {
+                    om = Double.parseDouble(cmd.getOptionValue("om"));
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid obstacle mass: " + cmd.getOptionValue("om"));
+                    return null;
+                }
+
+                if (om <= 0) {
+                    System.err.println("Obstacle mass must be greater than 0");
+                    return null;
+                }
+
+                builder.freeObstacle(om, or);
+            } else {
+                builder.obstacle(or);
+            }
+        } else {
+            System.err.println("Obstacle parameters are required: obs, or, om");
+            return null;
+        }
 
         return builder.build();
     }
@@ -55,7 +273,8 @@ public class ArgParser {
         formatter.setWidth(120);
 
         String commandLineSyntax =
-                "java -jar event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar [options]";
+                "java -jar event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar"
+                        + " [options]";
 
         formatter.printHelp(commandLineSyntax, options);
     }
