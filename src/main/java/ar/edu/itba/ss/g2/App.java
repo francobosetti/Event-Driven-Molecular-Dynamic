@@ -6,9 +6,12 @@ import ar.edu.itba.ss.g2.generation.ParticleGenerator;
 import ar.edu.itba.ss.g2.generation.CircleParticleGenerator;
 import ar.edu.itba.ss.g2.generation.SquareParticleGenerator;
 import ar.edu.itba.ss.g2.model.Particle;
+import ar.edu.itba.ss.g2.simulation.Simulation;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class App {
     public static void main(String[] args) {
@@ -57,5 +60,8 @@ public class App {
         for (Particle particle : particles) {
             System.out.println(particle);
         }
+        Simulation simulation = new Simulation(new HashSet<>(particles));
+        simulation.run();
+
     }
 }
