@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.g2.model.Events;
+package ar.edu.itba.ss.g2.simulation.events;
 
 import ar.edu.itba.ss.g2.model.Particle;
 

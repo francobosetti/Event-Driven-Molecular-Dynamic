@@ -1,6 +1,4 @@
-package ar.edu.itba.ss.g2.model.Events;
-
-import ar.edu.itba.ss.g2.model.Particle;
+package ar.edu.itba.ss.g2.simulation.events;
 
 abstract class Event implements Comparable<Event> {
     private final double t;
