@@ -20,4 +20,7 @@ abstract class Event implements Comparable<Event> {
     }
 
     abstract boolean wasSuperveningEvent();
+
+
+    abstract void resolveCollision();
 }
