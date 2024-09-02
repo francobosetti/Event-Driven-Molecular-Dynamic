@@ -2,6 +2,13 @@ package ar.edu.itba.ss.g2;
 
 import ar.edu.itba.ss.g2.config.ArgParser;
 import ar.edu.itba.ss.g2.config.Configuration;
+import ar.edu.itba.ss.g2.generation.ParticleGenerator;
+import ar.edu.itba.ss.g2.generation.CircleParticleGenerator;
+import ar.edu.itba.ss.g2.generation.SquareParticleGenerator;
+import ar.edu.itba.ss.g2.model.Particle;
+
+import java.util.List;
+import java.util.Random;
 
 public class App {
     public static void main(String[] args) {
@@ -14,6 +21,41 @@ public class App {
             System.exit(1);
         }
 
-        System.out.println(configuration);
+        // Generate particles
+        int particleCount = configuration.getParticleCount();
+        double particleRadius = configuration.getParticleRadius();
+        double particleMass = configuration.getParticleMass();
+        double initialVelocity = configuration.getInitialVelocity();
+        Random random = configuration.getRandom();
+
+        ParticleGenerator generator;
+
+        if (configuration.isDomainCircular()) {
+            double domainRadius = configuration.getDomainRadius();
+            generator =
+                    new CircleParticleGenerator(
+                            domainRadius,
+                            particleCount,
+                            particleRadius,
+                            particleMass,
+                            initialVelocity,
+                            random);
+        } else {
+            double domainSide = configuration.getDomainSide();
+            generator =
+                    new SquareParticleGenerator(
+                            domainSide,
+                            particleCount,
+                            particleRadius,
+                            particleMass,
+                            initialVelocity,
+                            random);
+        }
+
+        List<Particle> particles = generator.generate();
+
+        for (Particle particle : particles) {
+            System.out.println(particle);
+        }
     }
 }

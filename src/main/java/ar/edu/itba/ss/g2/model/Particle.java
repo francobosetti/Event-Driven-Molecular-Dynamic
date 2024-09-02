@@ -59,4 +59,17 @@ public class Particle {
     public int getCollisionCount() {
         return collisionCount;
     }
+
+    @Override
+    public String toString() {
+        return "Particle{" +
+                "x=" + x +
+                ", y=" + y +
+                ", vx=" + vx +
+                ", vy=" + vy +
+                ", mass=" + mass +
+                ", radius=" + radius +
+                ", collisionCount=" + collisionCount +
+                '}';
+    }
 }
