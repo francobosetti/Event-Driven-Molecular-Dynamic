@@ -1,6 +1,6 @@
 package ar.edu.itba.ss.g2.simulation.events;
 
-abstract class Event implements Comparable<Event> {
+public abstract class Event implements Comparable<Event> {
     private final double t;
 
     public Event(double t) {

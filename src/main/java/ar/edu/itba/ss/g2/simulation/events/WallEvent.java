@@ -2,7 +2,7 @@ package ar.edu.itba.ss.g2.simulation.events;
 
 import ar.edu.itba.ss.g2.model.Particle;
 
-abstract class WallEvent extends Event {
+public abstract class WallEvent extends Event {
     private final Particle particle;
     private final int collisionCount;
 
