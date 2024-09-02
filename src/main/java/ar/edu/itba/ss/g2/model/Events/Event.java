@@ -20,4 +20,6 @@ abstract class Event implements Comparable<Event> {
     public int compareTo(Event x) {
         return Double.compare(this.t, x.t);
     }
+
+    abstract boolean wasSuperveningEvent();
 }

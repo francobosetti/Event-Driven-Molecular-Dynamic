@@ -26,6 +26,7 @@ public class TwoParticleEvent extends Event{
         return b;
     }
 
+    @Override
     public boolean wasSuperveningEvent() {
         return a.getCollisionCount() != collisionCountA || b.getCollisionCount() != collisionCountB;
     }
