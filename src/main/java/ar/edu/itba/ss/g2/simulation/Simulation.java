@@ -16,7 +16,7 @@ public class Simulation {
         this.snapshots.add(particles);
     }
 
-    public void run() {
+    public void run(int steps) {
         // begin calculating all posible collitions
         Set<Particle> particles = snapshots.get(0);
         // begin queue ordered by time before crash
@@ -42,6 +42,20 @@ public class Simulation {
 
 
         // TODO: dequeue, update state, recalculate collitions for dequeued particle, etc
+
+        for(int i = 0; i < steps; i++) {
+            Event event = collitionEventQueue.poll();
+            if(event == null) {
+                break;
+            }
+            if(event.wasSuperveningEvent()) {
+                continue;
+            }
+            event.resolveCollision();
+
+            // TODO: i need the involved particle / particles to propperly update the list
+
+        }
 
     }
 
