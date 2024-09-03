@@ -79,7 +79,7 @@ public class Particle {
         return "Particle{"
                 + "id="
                 + id
-                + "x="
+                + ", x="
                 + x
                 + ", y="
                 + y
