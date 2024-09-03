@@ -48,7 +48,8 @@ public class Simulation {
             if(event == null) {
                 break;
             }
-            if(event.wasSuperveningEvent()) {
+
+            if(event.isInvalid()) {
                 continue;
             }
             event.resolveCollision();

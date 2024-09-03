@@ -13,7 +13,7 @@ public abstract class OneParticleEvent extends Event {
     }
 
     @Override
-    public boolean wasSuperveningEvent() {
+    public boolean isInvalid() {
         return particle.getCollisionCount() != collisionCount;
     }
 }

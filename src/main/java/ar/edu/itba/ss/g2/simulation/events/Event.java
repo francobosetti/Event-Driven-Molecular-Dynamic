@@ -19,7 +19,7 @@ public abstract class Event implements Comparable<Event> {
         return Double.compare(this.t, x.t);
     }
 
-    public abstract boolean wasSuperveningEvent();
+    public abstract boolean isInvalid();
 
 
     public abstract void resolveCollision();
