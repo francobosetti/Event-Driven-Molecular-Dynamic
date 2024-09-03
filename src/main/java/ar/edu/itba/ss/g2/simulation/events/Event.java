@@ -19,8 +19,8 @@ public abstract class Event implements Comparable<Event> {
         return Double.compare(this.t, x.t);
     }
 
-    abstract boolean wasSuperveningEvent();
+    public abstract boolean wasSuperveningEvent();
 
 
-    abstract void resolveCollision();
+    public abstract void resolveCollision();
 }
