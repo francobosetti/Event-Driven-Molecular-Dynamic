@@ -137,6 +137,36 @@ public class Simulation {
         return -(deltaVelPos + Math.sqrt(d)) / (deltaVelVel);
     }
 
+    private Double timeToCircularWallCollision(Particle p1) {
+        if(p1.getVx() == 0 && p1.getVy() == 0) {
+            return null;
+        }
+
+        // TODO: add propper radius
+        double circularWallRadius = 2;
+        // TODO: this
+        if(p1.getVx() == 0) {
+            return null;
+        }
+        // TODO: this
+        if(p1.getVy() == 0) {
+            return null;
+        }
+        double frac = p1.getVy()/p1.getVx();
+        double x0 = p1.getX();
+        double y0 = p1.getY();
+        double radius = p1.getRadius();
+        double a = 1 + frac*frac;
+        double b = 2*frac*(y0-frac*x0);
+        double c = (y0 - x0*frac)*(y0 - x0*frac) - (circularWallRadius - radius)*(circularWallRadius - radius);
+
+        double d = Math.sqrt(b*b - 4*a*c);
+
+        double x = (-b * Math.signum(p1.getVx())*d)/(2*a);
+
+        return (x-x0) / p1.getVx();
+    }
+
     // TODO: Add obstacle and circular wall collisions
     private void addParticleCollisions(Particle particle) {
 
