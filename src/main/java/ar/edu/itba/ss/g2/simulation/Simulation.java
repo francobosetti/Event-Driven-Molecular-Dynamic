@@ -159,7 +159,8 @@ public class Simulation {
     }
 
     private void saveSnapshot() {
-        Set<Particle> particlesCopy = particles.stream().map(Particle::new).collect(Collectors.toSet());
+        Set<Particle> particlesCopy =
+                particles.stream().map(Particle::new).collect(Collectors.toSet());
         snapshots.add(particlesCopy);
     }
 }

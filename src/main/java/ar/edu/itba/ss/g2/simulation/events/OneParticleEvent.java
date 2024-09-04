@@ -12,6 +12,10 @@ public abstract class OneParticleEvent extends Event {
         this.collisionCount = particle.getCollisionCount();
     }
 
+    public Particle getParticle() {
+        return particle;
+    }
+
     @Override
     public boolean isInvalid() {
         return particle.getCollisionCount() != collisionCount;

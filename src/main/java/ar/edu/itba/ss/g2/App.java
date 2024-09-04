@@ -60,8 +60,13 @@ public class App {
         for (Particle particle : particles) {
             System.out.println(particle);
         }
-        Simulation simulation = new Simulation(new HashSet<>(particles));
-        simulation.run();
+
+
+        double domainSide = configuration.getDomainSide();
+        double maxTime = configuration.getMaxTime();
+
+        Simulation simulation = new Simulation(new HashSet<>(particles), domainSide);
+        simulation.run(maxTime);
 
     }
 }

@@ -25,6 +25,17 @@ public class Particle {
         this.collisionCount = 0;
     }
 
+    public Particle(Particle particle) {
+        this.id = particle.id;
+        this.x = particle.x;
+        this.y = particle.y;
+        this.vx = particle.vx;
+        this.vy = particle.vy;
+        this.mass = particle.mass;
+        this.radius = particle.radius;
+        this.collisionCount = particle.collisionCount;
+    }
+
     public Double getX() {
         return x;
     }
