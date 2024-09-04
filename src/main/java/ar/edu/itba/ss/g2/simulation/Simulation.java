@@ -77,7 +77,7 @@ public class Simulation {
             // Save snapshot
             saveSnapshot();
 
-            currentTime = eventTime;
+            currentTime += eventTime;
         }
     }
 
