@@ -3,15 +3,15 @@ package ar.edu.itba.ss.g2.simulation;
 import ar.edu.itba.ss.g2.model.Particle;
 import ar.edu.itba.ss.g2.simulation.events.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Simulation {
 
-    private final List<Set<Particle>> snapshots;
+    private final Map<Double, Set<Particle>> snapshots;
     private final Set<Particle> particles;
     private final PriorityQueue<Event> collisionEventQueue;
 
@@ -21,14 +21,14 @@ public class Simulation {
         this.particles = particles;
         this.boxSide = boxSide;
 
-        this.snapshots = new ArrayList<>();
+        this.snapshots = new HashMap<>();
         this.collisionEventQueue = new PriorityQueue<>();
     }
 
     public void run(double maxTime) {
 
         // Save initial state
-        saveSnapshot();
+        saveSnapshot(0);
 
         // Load initial collisions
         for (Particle p1 : particles) {
@@ -75,13 +75,13 @@ public class Simulation {
             }
 
             // Save snapshot
-            saveSnapshot();
+            saveSnapshot(currentTime);
 
             currentTime += eventTime;
         }
     }
 
-    public List<Set<Particle>> getSnapshots() {
+    public Map<Double, Set<Particle>> getSnapshots() {
         return snapshots;
     }
 
@@ -158,9 +158,9 @@ public class Simulation {
         }
     }
 
-    private void saveSnapshot() {
+    private void saveSnapshot(double time) {
         Set<Particle> particlesCopy =
                 particles.stream().map(Particle::new).collect(Collectors.toSet());
-        snapshots.add(particlesCopy);
+        snapshots.put(time, particlesCopy);
     }
 }
