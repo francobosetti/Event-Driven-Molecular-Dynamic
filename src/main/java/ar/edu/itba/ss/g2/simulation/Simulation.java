@@ -1,63 +1,84 @@
 package ar.edu.itba.ss.g2.simulation;
 
 import ar.edu.itba.ss.g2.model.Particle;
-
-import java.util.*;
-
 import ar.edu.itba.ss.g2.simulation.events.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Simulation {
 
     private final List<Set<Particle>> snapshots;
+    private final Set<Particle> particles;
+    private final PriorityQueue<Event> collisionEventQueue;
 
+    private final double boxSide;
 
-    public Simulation(Set<Particle> particles) {
+    public Simulation(Set<Particle> particles, double boxSide) {
+        this.particles = particles;
+        this.boxSide = boxSide;
+
         this.snapshots = new ArrayList<>();
-        this.snapshots.add(particles);
+        this.collisionEventQueue = new PriorityQueue<>();
     }
 
-    public void run(int steps) {
-        // begin calculating all posible collitions
-        Set<Particle> particles = snapshots.get(0);
-        // begin queue ordered by time before crash
-        PriorityQueue<Event> collitionEventQueue = new PriorityQueue<>();
-        for(Particle p1 : particles) {
-            // TODO: square at the moment, should support both configurations ( square and circle )
-            // TODO: fixed obstacle collition
-            Double time = collidesWithHorizontalWall(p1);
-            if(time != null) {
-                collitionEventQueue.add(new HorizontalWallEvent(time, p1));
-            }
-            time = collidesWithVerticalWall(p1);
-            if(time != null) {
-                collitionEventQueue.add(new VerticalWallEvent(time, p1));
-            }
-            for (Particle p2 : particles) {
-                time = collidesWithParticle(p1, p2);
-                if(time != null) {
-                    collitionEventQueue.add(new TwoParticleEvent(time, p1, p2));
-                }
-            }
+    public void run(double maxTime) {
+
+        // Save initial state
+        saveSnapshot();
+
+        // Load initial collisions
+        for (Particle p1 : particles) {
+            addParticleCollisions(p1);
         }
 
+        double currentTime = 0;
+        while (currentTime < maxTime) {
+            Event event = collisionEventQueue.poll();
 
-        // TODO: dequeue, update state, recalculate collitions for dequeued particle, etc
-
-        for(int i = 0; i < steps; i++) {
-            Event event = collitionEventQueue.poll();
-            if(event == null) {
+            // TODO: maybe unnecesary?
+            if (event == null) {
                 break;
             }
 
-            if(event.isInvalid()) {
+            if (event.isInvalid()) {
                 continue;
             }
+
+            double eventTime = event.getTime();
+            double timeDiff = eventTime - currentTime;
+
+            // Advance particles
+            for (Particle particle : particles) {
+                particle.setX(particle.getX() + particle.getVx() * timeDiff);
+                particle.setY(particle.getY() + particle.getVy() * timeDiff);
+            }
+
             event.resolveCollision();
 
-            // TODO: i need the involved particle / particles to propperly update the list
+            // Recalculate future collisions
+            // TODO: refactor this aberracion absoluta
+            if (event instanceof TwoParticleEvent twoParticleEvent) {
+                Particle particleA = twoParticleEvent.getParticleA();
+                Particle particleB = twoParticleEvent.getParticleB();
 
+                addParticleCollisions(particleA);
+                addParticleCollisions(particleB);
+
+            } else if (event instanceof OneParticleEvent oneParticleEvent) {
+                Particle particle = oneParticleEvent.getParticle();
+
+                addParticleCollisions(particle);
+            }
+
+            // Save snapshot
+            saveSnapshot();
+
+            currentTime = eventTime;
         }
-
     }
 
     public List<Set<Particle>> getSnapshots() {
