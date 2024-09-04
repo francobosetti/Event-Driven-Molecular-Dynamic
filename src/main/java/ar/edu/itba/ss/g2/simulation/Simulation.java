@@ -101,15 +101,15 @@ public class Simulation {
         return distance / Math.abs(v);
     }
 
-    public Double timeToHorizontalWallCollision(Particle p1) {
+    private Double timeToHorizontalWallCollision(Particle p1) {
         return timeToLinearWallCollision(p1.getVy(), p1.getRadius(), p1.getY());
     }
 
-    public Double timeToVerticalWallCollision(Particle p1) {
+    private Double timeToVerticalWallCollision(Particle p1) {
         return timeToLinearWallCollision(p1.getVx(), p1.getRadius(), p1.getX());
     }
 
-    public Double timeToParticleCollision(Particle p1, Particle p2) {
+    private Double timeToParticleCollision(Particle p1, Particle p2) {
         Double deltaVelX = p2.getVx() - p1.getVx();
         Double deltaVelY = p2.getVy() - p1.getVy();
 
@@ -138,7 +138,7 @@ public class Simulation {
     }
 
     // TODO: Add obstacle and circular wall collisions
-    public void addParticleCollisions(Particle particle) {
+    private void addParticleCollisions(Particle particle) {
 
         Double time = timeToHorizontalWallCollision(particle);
         if (time != null) {
