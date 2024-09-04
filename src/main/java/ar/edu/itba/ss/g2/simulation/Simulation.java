@@ -64,47 +64,55 @@ public class Simulation {
         return snapshots;
     }
 
-    private static Double collidesWithLinearWall(double v, double radius, double axisPosition, double axisUpperBoundry) {
-        if(v == 0) return null;
-        if(v < 0) {
-            return (radius - axisPosition) / v;
+    private Double timeToLinearWallCollision(double v, double radius, double position) {
+        if (v == 0) {
+            return null;
         }
-        return (axisUpperBoundry - radius - axisPosition) / v;
+
+        double distance;
+
+        if (v > 0) {
+            distance = boxSide - position - radius;
+        } else {
+            distance = position - radius;
+        }
+
+        return distance / Math.abs(v);
     }
 
-    public static Double collidesWithHorizontalWall(Particle p1) {
-        // TODO: add upper boundry, should be the vertical dimension of the box
-        return collidesWithLinearWall(p1.getVy(), p1.getRadius(), p1.getY(), 0);
+    public Double timeToHorizontalWallCollision(Particle p1) {
+        return timeToLinearWallCollision(p1.getVy(), p1.getRadius(), p1.getY());
     }
 
-    public static Double collidesWithVerticalWall(Particle p1) {
-        // TODO: add upper boundry, should be the hotizontal dimension of the box
-        return collidesWithLinearWall(p1.getVx(), p1.getRadius(), p1.getX(), 0);
+    public Double timeToVerticalWallCollision(Particle p1) {
+        return timeToLinearWallCollision(p1.getVx(), p1.getRadius(), p1.getX());
     }
 
-    public static Double collidesWithParticle(Particle p1, Particle p2) {
+    public Double timeToParticleCollision(Particle p1, Particle p2) {
         Double deltaVelX = p2.getVx() - p1.getVx();
-        Double deltaVely = p2.getVy() - p1.getVy();
+        Double deltaVelY = p2.getVy() - p1.getVy();
 
         Double deltaPosX = p2.getX() - p1.getX();
         Double deltaPosY = p2.getY() - p1.getY();
 
-        double deltaVelPos = deltaVelX * deltaPosX + deltaVely * deltaPosY;
+        double deltaVelPos = deltaVelX * deltaPosX + deltaVelY * deltaPosY;
 
         if (deltaVelPos >= 0) {
             return null;
         }
 
-        double deltaVelVel = deltaVelX * deltaVelX + deltaVely * deltaVely;
+        double deltaVelVel = deltaVelX * deltaVelX + deltaVelY * deltaVelY;
         double deltaPosPos = deltaPosX * deltaPosX + deltaPosY * deltaPosY;
 
-        double radiusSquared = (p1.getX() - p2.getX()) * (p1.getX() - p2.getX()) + (p1.getY() - p2.getY()) * (p1.getY() - p2.getY());
+        double radiusSquared =
+                (p1.getX() - p2.getX()) * (p1.getX() - p2.getX())
+                        + (p1.getY() - p2.getY()) * (p1.getY() - p2.getY());
         double d = deltaVelPos * deltaVelPos - (deltaVelVel * (deltaPosPos - radiusSquared));
 
-        if (d<0) {
+        if (d < 0) {
             return null;
         }
 
-        return -(deltaVelPos + Math.sqrt(d))/(deltaVelVel);
+        return -(deltaVelPos + Math.sqrt(d)) / (deltaVelVel);
     }
 }
