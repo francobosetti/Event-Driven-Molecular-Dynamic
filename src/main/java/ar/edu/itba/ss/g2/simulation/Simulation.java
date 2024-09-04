@@ -115,4 +115,30 @@ public class Simulation {
 
         return -(deltaVelPos + Math.sqrt(d)) / (deltaVelVel);
     }
+
+    // TODO: Add obstacle and circular wall collisions
+    public void addParticleCollisions(Particle particle) {
+
+        Double time = timeToHorizontalWallCollision(particle);
+        if (time != null) {
+            collisionEventQueue.add(new HorizontalWallEvent(time, particle));
+        }
+
+        time = timeToVerticalWallCollision(particle);
+        if (time != null) {
+            collisionEventQueue.add(new VerticalWallEvent(time, particle));
+        }
+
+        for (Particle p2 : particles) {
+            time = timeToParticleCollision(particle, p2);
+            if (time != null) {
+                collisionEventQueue.add(new TwoParticleEvent(time, particle, p2));
+            }
+        }
+    }
+
+    private void saveSnapshot() {
+        Set<Particle> particlesCopy = particles.stream().map(Particle::new).collect(Collectors.toSet());
+        snapshots.add(particlesCopy);
+    }
 }
