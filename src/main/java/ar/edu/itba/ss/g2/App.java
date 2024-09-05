@@ -31,6 +31,7 @@ public class App {
         double particleRadius = configuration.getParticleRadius();
         double particleMass = configuration.getParticleMass();
         double initialVelocity = configuration.getInitialVelocity();
+        double obstacleRadius = configuration.getObstacleRadius();
         Random random = configuration.getRandom();
 
         ParticleGenerator generator;
@@ -44,6 +45,7 @@ public class App {
                             particleRadius,
                             particleMass,
                             initialVelocity,
+                            obstacleRadius,
                             random);
         } else {
             double domainSide = configuration.getDomainSide();
@@ -54,6 +56,7 @@ public class App {
                             particleRadius,
                             particleMass,
                             initialVelocity,
+                            obstacleRadius,
                             random);
         }
 
@@ -68,10 +71,24 @@ public class App {
             return;
         }
 
-        double domainSide = configuration.getDomainSide();
+        double domainSize = configuration.isDomainCircular() ? configuration.getDomainRadius() : configuration.getDomainSide();
+
+        double obstacleX = configuration.isDomainCircular() ? 0 : domainSize / 2;
+        double obstacleY = configuration.isDomainCircular() ? 0 : domainSize / 2;
+
         double maxTime = configuration.getMaxTime();
 
-        Simulation simulation = new Simulation(new HashSet<>(particles), domainSide);
+        Simulation simulation;
+
+        if (configuration.isObstacleFree()) {
+            double obstacleMass = configuration.getObstacleMass();
+            Particle obstacle = new Particle(particleCount + 1, obstacleX, obstacleY, 0.0, 0.0, obstacleRadius, obstacleMass);
+            particles.add(obstacle);
+
+            simulation = new Simulation(new HashSet<>(particles), domainSize);
+        } else {
+            simulation = new Simulation(new HashSet<>(particles), domainSize, obstacleRadius);
+        }
 
         System.out.println("Running simulation...");
 

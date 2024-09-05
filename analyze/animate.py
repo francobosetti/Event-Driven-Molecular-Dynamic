@@ -180,12 +180,31 @@ def animate_particles(static_config, dynamic_file, interpolate):
         circle = plt.Circle(
             (0, 0), static_config["domain_radius"], color="black", fill=False
         )
+
+        if static_config["obstacle_type"] == "obstacle":
+            circle = plt.Circle(
+                (0, 0), static_config["obstacle_radius"], color="black", fill=True
+            )
+            ax.add_artist(circle)
+
         ax.add_artist(circle)
         ax.set_xlim(-static_config["domain_radius"], static_config["domain_radius"])
         ax.set_ylim(-static_config["domain_radius"], static_config["domain_radius"])
     else:
         ax.set_xlim(0, static_config["domain_radius"])
         ax.set_ylim(0, static_config["domain_radius"])
+
+        if static_config["obstacle_type"] == "obstacle":
+            circle = plt.Circle(
+                (
+                    static_config["domain_radius"] / 2,
+                    static_config["domain_radius"] / 2,
+                ),
+                static_config["obstacle_radius"],
+                color="black",
+                fill=True,
+            )
+            ax.add_artist(circle)
 
     # no ticks
     ax.set_xticks([])
@@ -198,6 +217,10 @@ def animate_particles(static_config, dynamic_file, interpolate):
         plt.Circle((x, y), particle_radius, color="blue")
         for x, y, _, _ in particle_data[0]
     ]
+
+    if static_config["obstacle_type"] == "free":
+        circles[-1].set_color("red")
+        circles[-1].set_radius(static_config["obstacle_radius"])
 
     print("Creating animation...")
 
