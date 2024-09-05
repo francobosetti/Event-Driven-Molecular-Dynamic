@@ -210,6 +210,7 @@ public class Configuration {
 
         public Builder freeObstacle(double obstacleMass, double obstacleRadius) {
             this.obstacleMass = obstacleMass;
+            this.obstacleRadius = obstacleRadius;
             this.isObstacleFree = true;
             return this;
         }

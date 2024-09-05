@@ -18,9 +18,29 @@ public class Simulation {
     private final double boxSide;
     private double currentTime;
 
+    private final double obstacleRadius;
+    private final boolean hasObstacle;
+
+    public Simulation(Set<Particle> particles, double boxSide, double obstacleRadius) {
+        this.particles = particles;
+        this.boxSide = boxSide;
+
+        this.obstacleRadius = obstacleRadius;
+        this.hasObstacle = true;
+
+        this.currentTime = 0;
+
+        this.snapshots = new HashMap<>();
+        this.collisionEventQueue = new PriorityQueue<>();
+    }
+
     public Simulation(Set<Particle> particles, double boxSide) {
         this.particles = particles;
         this.boxSide = boxSide;
+
+        this.hasObstacle = false;
+        this.obstacleRadius = 0;
+
         this.currentTime = 0;
 
         this.snapshots = new HashMap<>();
@@ -137,6 +157,14 @@ public class Simulation {
         return -(deltaVelPos + Math.sqrt(d)) / (deltaVelVel);
     }
 
+    private Double timeToObstacleCollision(Particle p1) {
+        // TODO: medio feo
+        Particle obstacle =
+                new Particle(0, boxSide / 2, boxSide / 2, 0.0, 0.0, obstacleRadius, 0.0);
+
+        return timeToParticleCollision(p1, obstacle);
+    }
+
     private Double timeToCircularWallCollision(Particle p1) {
         if(p1.getVx() == 0 && p1.getVy() == 0) {
             return null;
@@ -167,7 +195,7 @@ public class Simulation {
         return (x-x0) / p1.getVx();
     }
 
-    // TODO: Add obstacle and circular wall collisions
+    // TODO: Add  circular wall collisions
     private void addParticleCollisions(Particle particle) {
 
         Double time = timeToHorizontalWallCollision(particle);
@@ -178,6 +206,14 @@ public class Simulation {
         time = timeToVerticalWallCollision(particle);
         if (time != null) {
             collisionEventQueue.add(new VerticalWallEvent(currentTime + time, particle));
+        }
+
+        if (hasObstacle) {
+            time = timeToObstacleCollision(particle);
+            if (time != null) {
+                collisionEventQueue.add(
+                        new ObstacleEvent(currentTime + time, particle, boxSide / 2, boxSide / 2));
+            }
         }
 
         for (Particle p2 : particles) {

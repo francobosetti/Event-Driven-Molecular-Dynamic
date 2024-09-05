@@ -16,8 +16,9 @@ public class SquareParticleGenerator extends ParticleGenerator {
             double particleRadius,
             double particleMass,
             double initialVelocity,
+            double obstacleRadius,
             Random random) {
-        super(particleCount, particleRadius, particleMass, initialVelocity, random);
+        super(particleCount, particleRadius, particleMass, initialVelocity, obstacleRadius, random);
         this.domainSide = domainSide;
     }
 
@@ -41,7 +42,15 @@ public class SquareParticleGenerator extends ParticleGenerator {
 
             Particle particle = new Particle(i, x, y, vx, vy, particleRadius, particleMass);
 
-            if (particles.stream().anyMatch(p -> p.overlaps(particle))) {
+            // Obstacle is a circle in the center of the square
+            double obstacleCenter = domainSide / 2;
+            double centerToCenterDistance = Math.sqrt(Math.pow(x - obstacleCenter, 2) + Math.pow(y - obstacleCenter, 2));
+
+            boolean overlapsObstacle = centerToCenterDistance < obstacleRadius + particleRadius;
+            boolean overlapsParticle = particles.stream().anyMatch(p -> p.overlaps(particle));
+
+
+            if (overlapsObstacle || overlapsParticle) {
                 i--;
                 continue;
             }

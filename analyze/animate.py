@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import sys
 
 
 # Load static configuration
@@ -163,7 +164,7 @@ def update(frame, circles, particle_data):
     return circles
 
 
-def animate_particles(static_config, dynamic_file, interpolate):
+def animate_particles(static_config, dynamic_file, interpolate=True, output_file="data/particle_animation.mp4"):
     # Load dynamic data
     time_steps, particle_data = load_dynamic_data(dynamic_file)
 
@@ -180,12 +181,31 @@ def animate_particles(static_config, dynamic_file, interpolate):
         circle = plt.Circle(
             (0, 0), static_config["domain_radius"], color="black", fill=False
         )
+
+        if static_config["obstacle_type"] == "obstacle":
+            circle = plt.Circle(
+                (0, 0), static_config["obstacle_radius"], color="black", fill=True
+            )
+            ax.add_artist(circle)
+
         ax.add_artist(circle)
         ax.set_xlim(-static_config["domain_radius"], static_config["domain_radius"])
         ax.set_ylim(-static_config["domain_radius"], static_config["domain_radius"])
     else:
         ax.set_xlim(0, static_config["domain_radius"])
         ax.set_ylim(0, static_config["domain_radius"])
+
+        if static_config["obstacle_type"] == "obstacle":
+            circle = plt.Circle(
+                (
+                    static_config["domain_radius"] / 2,
+                    static_config["domain_radius"] / 2,
+                ),
+                static_config["obstacle_radius"],
+                color="black",
+                fill=True,
+            )
+            ax.add_artist(circle)
 
     # no ticks
     ax.set_xticks([])
@@ -198,6 +218,10 @@ def animate_particles(static_config, dynamic_file, interpolate):
         plt.Circle((x, y), particle_radius, color="blue")
         for x, y, _, _ in particle_data[0]
     ]
+
+    if static_config["obstacle_type"] == "free":
+        circles[-1].set_color("red")
+        circles[-1].set_radius(static_config["obstacle_radius"])
 
     print("Creating animation...")
 
@@ -218,8 +242,16 @@ def animate_particles(static_config, dynamic_file, interpolate):
 
 # Main
 if __name__ == "__main__":
-    static_file = "data/static.txt"
-    dynamic_file = "data/dynamic.txt"
 
+    # Directory as argument
+    if len(sys.argv) != 2:
+        print("Usage: python animate.py <directory>")
+        sys.exit(1)
+
+    static_file = sys.argv[1] + "/static.txt"
+    dynamic_file = sys.argv[1] + "/dynamic.txt"
+    output_file = sys.argv[1] + "/particle_animation.mp4"
+
+    
     static_config = load_static_data(static_file)
-    animate_particles(static_config, dynamic_file, True)
+    animate_particles(static_config, dynamic_file, interpolate=True, output_file=output_file)
