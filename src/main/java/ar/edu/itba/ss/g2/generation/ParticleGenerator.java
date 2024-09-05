@@ -13,6 +13,7 @@ public abstract class ParticleGenerator {
     protected final double particleRadius;
     protected final double particleMass;
     protected final double initialVelocity;
+    protected final double obstacleRadius;
     protected final Random random;
 
     protected ParticleGenerator(
@@ -20,11 +21,13 @@ public abstract class ParticleGenerator {
             double particleRadius,
             double particleMass,
             double initialVelocity,
+            double obstacleRadius,
             Random random) {
         this.particleCount = particleCount;
         this.particleRadius = particleRadius;
         this.particleMass = particleMass;
         this.initialVelocity = initialVelocity;
+        this.obstacleRadius = obstacleRadius;
         this.random = random;
     }
 
