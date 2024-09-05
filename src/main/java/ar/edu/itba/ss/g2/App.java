@@ -2,16 +2,18 @@ package ar.edu.itba.ss.g2;
 
 import ar.edu.itba.ss.g2.config.ArgParser;
 import ar.edu.itba.ss.g2.config.Configuration;
-import ar.edu.itba.ss.g2.generation.ParticleGenerator;
 import ar.edu.itba.ss.g2.generation.CircleParticleGenerator;
+import ar.edu.itba.ss.g2.generation.ParticleGenerator;
 import ar.edu.itba.ss.g2.generation.SquareParticleGenerator;
+import ar.edu.itba.ss.g2.model.Output;
 import ar.edu.itba.ss.g2.model.Particle;
 import ar.edu.itba.ss.g2.simulation.Simulation;
+import ar.edu.itba.ss.g2.utils.FileUtil;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class App {
     public static void main(String[] args) {
@@ -55,18 +57,35 @@ public class App {
                             random);
         }
 
-        List<Particle> particles = generator.generate();
+        List<Particle> particles;
 
-        for (Particle particle : particles) {
-            System.out.println(particle);
+        try {
+            System.out.println("Generating particles...");
+            particles = generator.generate();
+        } catch (IllegalStateException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+            return;
         }
-
 
         double domainSide = configuration.getDomainSide();
         double maxTime = configuration.getMaxTime();
 
         Simulation simulation = new Simulation(new HashSet<>(particles), domainSide);
+
+        System.out.println("Running simulation...");
+
         simulation.run(maxTime);
 
+        System.out.println("Simulation finished, writing output...");
+
+        Output output = new Output(simulation.getSnapshots(), configuration);
+
+        try {
+            FileUtil.serializeOutput(output, configuration.getOutputDirectory());
+        } catch (IOException e) {
+            System.err.println("Error writing output file: " + e.getMessage());
+            System.exit(1);
+        }
     }
 }

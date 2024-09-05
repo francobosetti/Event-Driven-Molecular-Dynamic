@@ -36,6 +36,10 @@ public class Particle {
         this.collisionCount = particle.collisionCount;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public Double getX() {
         return x;
     }
