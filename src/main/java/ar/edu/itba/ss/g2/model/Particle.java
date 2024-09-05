@@ -85,6 +85,15 @@ public class Particle {
         collisionCount++;
     }
 
+    public boolean overlaps(Particle other) {
+        double otherX = other.getX();
+        double otherY = other.getY();
+
+        double distance = Math.sqrt(Math.pow(x - otherX, 2) + Math.pow(y - otherY, 2));
+
+        return distance < radius + other.getRadius();
+    }
+
     @Override
     public String toString() {
         return "Particle{"

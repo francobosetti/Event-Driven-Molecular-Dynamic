@@ -25,7 +25,12 @@ public class SquareParticleGenerator extends ParticleGenerator {
     public List<Particle> generate() {
         List<Particle> particles = new ArrayList<>(particleCount);
 
-        for (int i = 0; i < particleCount; i++) {
+        for (int i = 0, tries = 0; i < particleCount; i++, tries++) {
+
+            if (tries > MAX_TRIES) {
+                throw new IllegalStateException("Could not generate particles without overlaps");
+            }
+
             double x = random.nextDouble() * domainSide;
             double y = random.nextDouble() * domainSide;
             
@@ -34,7 +39,14 @@ public class SquareParticleGenerator extends ParticleGenerator {
             double vx = initialVelocity * Math.cos(velocityAngle);
             double vy = initialVelocity * Math.sin(velocityAngle);
 
-            particles.add(new Particle(i, x, y, vx, vy, particleRadius, particleMass));
+            Particle particle = new Particle(i, x, y, vx, vy, particleRadius, particleMass);
+
+            if (particles.stream().anyMatch(p -> p.overlaps(particle))) {
+                i--;
+                continue;
+            }
+
+            particles.add(particle);
         }
 
         return particles;
