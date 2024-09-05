@@ -31,8 +31,8 @@ public class SquareParticleGenerator extends ParticleGenerator {
                 throw new IllegalStateException("Could not generate particles without overlaps");
             }
 
-            double x = random.nextDouble() * domainSide;
-            double y = random.nextDouble() * domainSide;
+            double x = random.nextDouble() * (domainSide - 2 * particleRadius) + particleRadius;
+            double y = random.nextDouble() * (domainSide - 2 * particleRadius) + particleRadius;
             
             double velocityAngle = random.nextDouble() * 2 * Math.PI;
 

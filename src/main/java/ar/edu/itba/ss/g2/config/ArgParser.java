@@ -86,6 +86,8 @@ public class ArgParser {
                 return null;
             }
 
+            builder.maxTime(maxTime);
+
         } else {
             System.err.println("Max simulation time is required");
             return null;

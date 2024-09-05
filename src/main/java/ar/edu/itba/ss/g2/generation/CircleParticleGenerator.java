@@ -33,7 +33,7 @@ public class CircleParticleGenerator extends ParticleGenerator {
             
             // Coords. polares
             double positionAngle = random.nextDouble() * 2 * Math.PI;
-            double positionRadius = random.nextDouble() * domainRadius;
+            double positionRadius = random.nextDouble() * (domainRadius - particleRadius);
 
             double x = positionRadius * Math.cos(positionAngle);
             double y = positionRadius * Math.sin(positionAngle);
