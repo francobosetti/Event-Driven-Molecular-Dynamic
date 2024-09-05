@@ -126,9 +126,8 @@ public class Simulation {
         double deltaVelVel = deltaVelX * deltaVelX + deltaVelY * deltaVelY;
         double deltaPosPos = deltaPosX * deltaPosX + deltaPosY * deltaPosY;
 
-        double radiusSquared =
-                (p1.getX() - p2.getX()) * (p1.getX() - p2.getX())
-                        + (p1.getY() - p2.getY()) * (p1.getY() - p2.getY());
+        double radiusSquared =  (p1.getRadius() + p2.getRadius()) * (p1.getRadius() + p2.getRadius());
+
         double d = deltaVelPos * deltaVelPos - (deltaVelVel * (deltaPosPos - radiusSquared));
 
         if (d < 0) {
