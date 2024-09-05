@@ -16,10 +16,12 @@ public class Simulation {
     private final PriorityQueue<Event> collisionEventQueue;
 
     private final double boxSide;
+    private double currentTime;
 
     public Simulation(Set<Particle> particles, double boxSide) {
         this.particles = particles;
         this.boxSide = boxSide;
+        this.currentTime = 0;
 
         this.snapshots = new HashMap<>();
         this.collisionEventQueue = new PriorityQueue<>();
@@ -35,7 +37,6 @@ public class Simulation {
             addParticleCollisions(p1);
         }
 
-        double currentTime = 0;
         while (currentTime < maxTime) {
             Event event = collisionEventQueue.poll();
 
@@ -57,6 +58,8 @@ public class Simulation {
                 particle.setY(particle.getY() + particle.getVy() * timeDiff);
             }
 
+            currentTime = eventTime;
+
             event.resolveCollision();
 
             // Recalculate future collisions
@@ -76,8 +79,6 @@ public class Simulation {
 
             // Save snapshot
             saveSnapshot(currentTime);
-
-            currentTime += eventTime;
         }
     }
 
@@ -172,18 +173,18 @@ public class Simulation {
 
         Double time = timeToHorizontalWallCollision(particle);
         if (time != null) {
-            collisionEventQueue.add(new HorizontalWallEvent(time, particle));
+            collisionEventQueue.add(new HorizontalWallEvent(currentTime + time, particle));
         }
 
         time = timeToVerticalWallCollision(particle);
         if (time != null) {
-            collisionEventQueue.add(new VerticalWallEvent(time, particle));
+            collisionEventQueue.add(new VerticalWallEvent(currentTime + time, particle));
         }
 
         for (Particle p2 : particles) {
             time = timeToParticleCollision(particle, p2);
             if (time != null) {
-                collisionEventQueue.add(new TwoParticleEvent(time, particle, p2));
+                collisionEventQueue.add(new TwoParticleEvent(currentTime + time, particle, p2));
             }
         }
     }
