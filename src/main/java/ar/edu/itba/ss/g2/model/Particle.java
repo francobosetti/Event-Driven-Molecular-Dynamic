@@ -9,19 +9,19 @@ public class Particle {
     private Double vx;
     private Double vy;
 
-    private final Double mass;
     private final Double radius;
+    private final Double mass;
 
     private int collisionCount;
 
-    public Particle(int id, Double x, Double y, Double vx, Double vy, Double mass, Double radius) {
+    public Particle(int id, Double x, Double y, Double vx, Double vy, Double radius, Double mass) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.vx = vx;
         this.vy = vy;
-        this.mass = mass;
         this.radius = radius;
+        this.mass = mass;
         this.collisionCount = 0;
     }
 
@@ -31,8 +31,8 @@ public class Particle {
         this.y = particle.y;
         this.vx = particle.vx;
         this.vy = particle.vy;
-        this.mass = particle.mass;
         this.radius = particle.radius;
+        this.mass = particle.mass;
         this.collisionCount = particle.collisionCount;
     }
 
