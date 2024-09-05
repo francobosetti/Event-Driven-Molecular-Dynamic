@@ -182,6 +182,11 @@ public class Simulation {
         }
 
         for (Particle p2 : particles) {
+
+            if (p2.equals(particle)) {
+                continue;
+            }
+
             time = timeToParticleCollision(particle, p2);
             if (time != null) {
                 collisionEventQueue.add(new TwoParticleEvent(currentTime + time, particle, p2));
