@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import sys
 
 
 # Load static configuration
@@ -163,7 +164,7 @@ def update(frame, circles, particle_data):
     return circles
 
 
-def animate_particles(static_config, dynamic_file, interpolate):
+def animate_particles(static_config, dynamic_file, interpolate=True, output_file="data/particle_animation.mp4"):
     # Load dynamic data
     time_steps, particle_data = load_dynamic_data(dynamic_file)
 
@@ -241,8 +242,16 @@ def animate_particles(static_config, dynamic_file, interpolate):
 
 # Main
 if __name__ == "__main__":
-    static_file = "data/static.txt"
-    dynamic_file = "data/dynamic.txt"
 
+    # Directory as argument
+    if len(sys.argv) != 2:
+        print("Usage: python animate.py <directory>")
+        sys.exit(1)
+
+    static_file = sys.argv[1] + "/static.txt"
+    dynamic_file = sys.argv[1] + "/dynamic.txt"
+    output_file = sys.argv[1] + "/particle_animation.mp4"
+
+    
     static_config = load_static_data(static_file)
-    animate_particles(static_config, dynamic_file, True)
+    animate_particles(static_config, dynamic_file, interpolate=True, output_file=output_file)
