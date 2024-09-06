@@ -255,4 +255,4 @@ if __name__ == "__main__":
 
     
     static_config = load_static_data(static_file)
-    animate_particles(static_config, dynamic_file, interpolate=True, output_file=output_file)
+    animate_particles(static_config, dynamic_file, interpolate=False, output_file=output_file)
