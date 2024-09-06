@@ -46,7 +46,7 @@ public class CircleParticleGenerator extends ParticleGenerator {
             double vx = initialVelocity * Math.cos(velocityAngle);
             double vy = initialVelocity * Math.sin(velocityAngle);
 
-            Particle particle = new Particle(i, x, y, vx, vy, particleMass, particleRadius);
+            Particle particle = new Particle(i, x, y, vx, vy, particleRadius, particleMass);
 
             if (particles.stream().anyMatch(p -> p.overlaps(particle))) {
                 i--;
