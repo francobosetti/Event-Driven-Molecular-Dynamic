@@ -182,13 +182,14 @@ def animate_particles(static_config, dynamic_file, interpolate=True, output_file
             (0, 0), static_config["domain_radius"], color="black", fill=False
         )
 
+        ax.add_artist(circle)
+
         if static_config["obstacle_type"] == "obstacle":
             circle = plt.Circle(
                 (0, 0), static_config["obstacle_radius"], color="black", fill=True
             )
             ax.add_artist(circle)
 
-        ax.add_artist(circle)
         ax.set_xlim(-static_config["domain_radius"], static_config["domain_radius"])
         ax.set_ylim(-static_config["domain_radius"], static_config["domain_radius"])
     else:
