@@ -15,17 +15,26 @@ public class Simulation {
     private final Set<Particle> particles;
     private final PriorityQueue<Event> collisionEventQueue;
 
-    private final double boxSide;
     private double currentTime;
 
     private final double obstacleRadius;
+    private final double obstacleCenter;
     private final boolean hasObstacle;
 
-    public Simulation(Set<Particle> particles, double boxSide, double obstacleRadius) {
+    private final double domainSize;
+    private final boolean isCircularDomain;
+
+    public Simulation(
+            Set<Particle> particles,
+            double domainSize,
+            boolean isCircularDomain,
+            double obstacleRadius) {
         this.particles = particles;
-        this.boxSide = boxSide;
+        this.domainSize = domainSize;
+        this.isCircularDomain = isCircularDomain;
 
         this.obstacleRadius = obstacleRadius;
+        this.obstacleCenter = isCircularDomain ? 0 : domainSize / 2;
         this.hasObstacle = true;
 
         this.currentTime = 0;
@@ -34,11 +43,13 @@ public class Simulation {
         this.collisionEventQueue = new PriorityQueue<>();
     }
 
-    public Simulation(Set<Particle> particles, double boxSide) {
+    public Simulation(Set<Particle> particles, double domainSize, boolean isCircularDomain) {
         this.particles = particles;
-        this.boxSide = boxSide;
+        this.domainSize = domainSize;
+        this.isCircularDomain = isCircularDomain;
 
         this.hasObstacle = false;
+        this.obstacleCenter = isCircularDomain ? 0 : domainSize / 2;
         this.obstacleRadius = 0;
 
         this.currentTime = 0;
@@ -114,7 +125,7 @@ public class Simulation {
         double distance;
 
         if (v > 0) {
-            distance = boxSide - position - radius;
+            distance = domainSize - position - radius;
         } else {
             distance = position - radius;
         }
@@ -146,7 +157,8 @@ public class Simulation {
         double deltaVelVel = deltaVelX * deltaVelX + deltaVelY * deltaVelY;
         double deltaPosPos = deltaPosX * deltaPosX + deltaPosY * deltaPosY;
 
-        double radiusSquared =  (p1.getRadius() + p2.getRadius()) * (p1.getRadius() + p2.getRadius());
+        double radiusSquared =
+                (p1.getRadius() + p2.getRadius()) * (p1.getRadius() + p2.getRadius());
 
         double d = deltaVelPos * deltaVelPos - (deltaVelVel * (deltaPosPos - radiusSquared));
 
@@ -160,59 +172,67 @@ public class Simulation {
     private Double timeToObstacleCollision(Particle p1) {
         // TODO: medio feo
         Particle obstacle =
-                new Particle(0, boxSide / 2, boxSide / 2, 0.0, 0.0, obstacleRadius, 0.0);
+                new Particle(0, obstacleCenter, obstacleCenter, 0.0, 0.0, obstacleRadius, 0.0);
 
         return timeToParticleCollision(p1, obstacle);
     }
 
     private Double timeToCircularWallCollision(Particle p1) {
-        if(p1.getVx() == 0 && p1.getVy() == 0) {
+        if (p1.getVx() == 0 && p1.getVy() == 0) {
             return null;
         }
 
-        // TODO: add propper radius
-        double circularWallRadius = 2;
         double radius = p1.getRadius();
-        double rSquared = (circularWallRadius - radius)*(circularWallRadius - radius);
+        double rSquared = (domainSize - radius) * (domainSize - radius);
         double x0 = p1.getX();
         double y0 = p1.getY();
 
-        if(p1.getVx() == 0) {
-            return (Math.sqrt(rSquared - x0*x0) - y0)/p1.getVy();
+        if (p1.getVx() == 0) {
+            return (Math.sqrt(rSquared - x0 * x0) - y0) / p1.getVy();
         }
-        if(p1.getVy() == 0) {
-            return (Math.sqrt(rSquared - y0*y0) - x0)/p1.getVx();
+        if (p1.getVy() == 0) {
+            return (Math.sqrt(rSquared - y0 * y0) - x0) / p1.getVx();
         }
-        double frac = p1.getVy()/p1.getVx();
-        double a = 1 + frac*frac;
-        double b = 2*frac*(y0-frac*x0);
-        double c = (y0 - x0*frac)*(y0 - x0*frac) - rSquared;
+        double frac = p1.getVy() / p1.getVx();
+        double a = 1 + frac * frac;
+        double b = 2 * frac * (y0 - frac * x0);
+        double c = (y0 - x0 * frac) * (y0 - x0 * frac) - rSquared;
 
-        double d = Math.sqrt(b*b - 4*a*c);
+        double d = Math.sqrt(b * b - 4 * a * c);
 
-        double x = (-b * Math.signum(p1.getVx())*d)/(2*a);
+        double x = (-b + Math.signum(p1.getVx()) * d) / (2 * a);
 
-        return (x-x0) / p1.getVx();
+        return (x - x0) / p1.getVx();
     }
 
     // TODO: Add  circular wall collisions
     private void addParticleCollisions(Particle particle) {
 
-        Double time = timeToHorizontalWallCollision(particle);
-        if (time != null) {
-            collisionEventQueue.add(new HorizontalWallEvent(currentTime + time, particle));
-        }
+        Double time;
+        if (isCircularDomain) {
+            time = timeToCircularWallCollision(particle);
+            if (time != null) {
+                collisionEventQueue.add(new CircularWallEvent(currentTime + time, particle));
+            }
 
-        time = timeToVerticalWallCollision(particle);
-        if (time != null) {
-            collisionEventQueue.add(new VerticalWallEvent(currentTime + time, particle));
+        } else {
+            time = timeToHorizontalWallCollision(particle);
+            if (time != null) {
+                collisionEventQueue.add(new HorizontalWallEvent(currentTime + time, particle));
+            }
+
+            time = timeToVerticalWallCollision(particle);
+            if (time != null) {
+                collisionEventQueue.add(new VerticalWallEvent(currentTime + time, particle));
+            }
         }
 
         if (hasObstacle) {
             time = timeToObstacleCollision(particle);
             if (time != null) {
                 collisionEventQueue.add(
-                        new ObstacleEvent(currentTime + time, particle, boxSide / 2, boxSide / 2));
+                        new ObstacleEvent(
+                                currentTime + time, particle, obstacleCenter, obstacleCenter));
             }
         }
 

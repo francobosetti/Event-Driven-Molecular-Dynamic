@@ -71,7 +71,10 @@ public class App {
             return;
         }
 
-        double domainSize = configuration.isDomainCircular() ? configuration.getDomainRadius() : configuration.getDomainSide();
+        double domainSize =
+                configuration.isDomainCircular()
+                        ? configuration.getDomainRadius()
+                        : configuration.getDomainSide();
 
         double obstacleX = configuration.isDomainCircular() ? 0 : domainSize / 2;
         double obstacleY = configuration.isDomainCircular() ? 0 : domainSize / 2;
@@ -82,12 +85,27 @@ public class App {
 
         if (configuration.isObstacleFree()) {
             double obstacleMass = configuration.getObstacleMass();
-            Particle obstacle = new Particle(particleCount + 1, obstacleX, obstacleY, 0.0, 0.0, obstacleRadius, obstacleMass);
+            Particle obstacle =
+                    new Particle(
+                            particleCount + 1,
+                            obstacleX,
+                            obstacleY,
+                            0.0,
+                            0.0,
+                            obstacleRadius,
+                            obstacleMass);
             particles.add(obstacle);
 
-            simulation = new Simulation(new HashSet<>(particles), domainSize);
+            simulation =
+                    new Simulation(
+                            new HashSet<>(particles), domainSize, configuration.isDomainCircular());
         } else {
-            simulation = new Simulation(new HashSet<>(particles), domainSize, obstacleRadius);
+            simulation =
+                    new Simulation(
+                            new HashSet<>(particles),
+                            domainSize,
+                            configuration.isDomainCircular(),
+                            obstacleRadius);
         }
 
         System.out.println("Running simulation...");
