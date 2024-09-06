@@ -182,27 +182,18 @@ public class Simulation {
             return null;
         }
 
-        double radius = p1.getRadius();
-        double rSquared = (domainSize - radius) * (domainSize - radius);
+        double dr = (domainSize - p1.getRadius());
         double x0 = p1.getX();
         double y0 = p1.getY();
 
-        if (p1.getVx() == 0) {
-            return (Math.sqrt(rSquared - x0 * x0) - y0) / p1.getVy();
-        }
-        if (p1.getVy() == 0) {
-            return (Math.sqrt(rSquared - y0 * y0) - x0) / p1.getVx();
-        }
-        double frac = p1.getVy() / p1.getVx();
-        double a = 1 + frac * frac;
-        double b = 2 * frac * (y0 - frac * x0);
-        double c = (y0 - x0 * frac) * (y0 - x0 * frac) - rSquared;
+        double vx = p1.getVx();
+        double vy = p1.getVy();
 
-        double d = Math.sqrt(b * b - 4 * a * c);
-
-        double x = (-b + Math.signum(p1.getVx()) * d) / (2 * a);
-
-        return (x - x0) / p1.getVx();
+        double a = vx*vx + vy*vy;
+        double b = 2*(x0*vx + y0*vy);
+        double c = x0*x0 + y0*y0 - dr*dr;
+        double d = Math.sqrt(b*b-4*a*c);
+        return (-b+d)/(2*a);
     }
 
     // TODO: Add  circular wall collisions
