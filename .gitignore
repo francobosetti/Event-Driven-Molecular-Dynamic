@@ -24,3 +24,6 @@ data
 
 .DS_Store
 .venv
+
+# Python cache
+__pycache__/
