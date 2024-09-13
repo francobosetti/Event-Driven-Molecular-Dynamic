@@ -1,6 +1,7 @@
 import concurrent.futures
 import sys
 import shutil
+import plots
 import utils
 import os
 import json
@@ -37,6 +38,12 @@ def execute_simulation(
 
     os.system(
         "java -jar target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar -obs fixed "
+        + f"-out {unique_dir} -N {N} -r {particle_radius} -m {particle_mass} -v {speed} "
+        + f"-e {e_max} -sz {domain_radius} -or {obstacle_radius} -d {domain_type}"
+    )
+
+    print(
+                "java -jar target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar -obs fixed "
         + f"-out {unique_dir} -N {N} -r {particle_radius} -m {particle_mass} -v {speed} "
         + f"-e {e_max} -sz {domain_radius} -or {obstacle_radius} -d {domain_type}"
     )
@@ -88,7 +95,9 @@ def execute_simulations(
         results = []
 
         # Wait for all tasks to complete and parse the files
-        for future in concurrent.futures.as_completed(futures):
+        futures = concurrent.futures.as_completed(futures)
+
+        for future in futures:
             try:
                 unique_dir = (
                     future.result()
@@ -103,12 +112,20 @@ def execute_simulations(
                 times, particle_data = utils.load_dynamic_data(dynamic_file)
 
                 # TODO: analyze results
+                collision_count = utils.get_collision_with_obstacle_count(
+                    times, particle_data, obstacle_radius, particle_radius
+                )
+                first_collision_count = utils.get_first_collision_with_obstacle_count(
+                    times, particle_data, obstacle_radius, particle_radius
+                )
 
 
                 # Append the parsed data to results
                 results.append(
                     {
                         "parameters": parameters,
+                        "collision_count": collision_count,
+                        "first_collision_count": first_collision_count
                     }
                 )
 
@@ -122,7 +139,45 @@ def execute_simulations(
 
 
 def plot_results(results, output_dir="data"):
-    return
+    
+    # Create a list of collision counts for speeds, ignore repetitions
+    found_speeds = set()
+    collision_counts_with_obstacle = []
+    first_collision_counts_with_obstacle = []
+    labels = []
+
+    for result in results:
+        parameters = result["parameters"]
+        v = parameters["initial_velocity"]
+        if v in found_speeds:
+            continue
+
+        found_speeds.add(v)
+        collision_count = result["collision_count"]
+        first_collision_count = result["first_collision_count"]
+
+        collision_counts_with_obstacle.append(collision_count)
+        first_collision_counts_with_obstacle.append(first_collision_count)
+        labels.append(f"v={v} (m/s)")
+
+    # Plot collision count vs time
+    plots.plot_collision_with_obstacle_vs_time(
+        collision_counts_with_obstacle,
+        labels,
+        "Collision count vs time",
+        filename=f"{output_dir}/collision_count_vs_time.png",
+    )
+
+    plots.plot_collision_with_obstacle_vs_time(
+        first_collision_counts_with_obstacle,
+        labels,
+        "First collision count vs time",
+        filename=f"{output_dir}/first_collision_count_vs_time.png",
+    )
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -136,20 +191,20 @@ if __name__ == "__main__":
 
     if sys.argv[1] == "generate":
 
-        N = 300
+        N = 1
         particle_radius = 0.001
         particle_mass = 1
 
         domain_type = "circular"
         domain_radius = 0.1 / 2
 
-        obstacle_radius = 0.005
+        obstacle_radius = 0.04
 
         speeds = [1, 3, 6, 10]
 
-        e_max = 10000
+        e_max = 1000
 
-        repetitions = 10
+        repetitions = 1
 
         results = execute_simulations(
             N,
