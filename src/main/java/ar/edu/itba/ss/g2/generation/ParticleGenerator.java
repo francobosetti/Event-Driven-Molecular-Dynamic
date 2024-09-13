@@ -7,7 +7,7 @@ import java.util.Random;
 
 public abstract class ParticleGenerator {
 
-    protected static final long MAX_TRIES = 10_000_000L;
+    protected static final long MAX_TRIES = 1_000_000_000L;
 
     protected final int particleCount;
     protected final double particleRadius;
