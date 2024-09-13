@@ -58,7 +58,7 @@ public class Simulation {
         this.collisionEventQueue = new PriorityQueue<>();
     }
 
-    public void run(double maxTime) {
+    public void run(long maxEvents) {
 
         // Save initial state
         saveSnapshot(0);
@@ -68,7 +68,9 @@ public class Simulation {
             addParticleCollisions(p1);
         }
 
-        while (currentTime < maxTime) {
+        long eventCount = 0;
+
+        while (eventCount < maxEvents) {
             Event event = collisionEventQueue.poll();
 
             // TODO: maybe unnecesary?
@@ -110,6 +112,8 @@ public class Simulation {
 
             // Save snapshot
             saveSnapshot(currentTime);
+
+            eventCount++;
         }
     }
 
