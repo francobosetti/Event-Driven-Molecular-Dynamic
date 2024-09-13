@@ -64,14 +64,13 @@ public class FileUtil {
 
                 for (Particle particle : particles) {
                     writer.write(
-                            +particle.getX()
-                                    + " "
-                                    + particle.getY()
-                                    + " "
-                                    + particle.getVx()
-                                    + " "
-                                    + particle.getVy()
-                                    + "\n");
+                            String.format(
+                                "%.5f %.5f %.5f %.5f\n", 
+                                particle.getX(), 
+                                particle.getY(), 
+                                particle.getVx(),
+                                particle.getVy())
+                            );
                 }
             }
         }
