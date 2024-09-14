@@ -68,11 +68,13 @@ def load_dynamic_data(dynamic_file):
 
 def get_collision_with_obstacle_count(times, particle_data, obstacle_radius, particle_radius):
     
-    epsilon = 1e-6
+    epsilon = 1e-5
 
     # Map of time to collision count
 
     collision_count = {}
+
+    print(f"Collision count: {len(times) - 1}")
 
     count = 0
 
@@ -81,7 +83,7 @@ def get_collision_with_obstacle_count(times, particle_data, obstacle_radius, par
 
         collisions = []
 
-        for (_, _, vx1, vy1), (x2, y2, vx2, vy2) in zip(particle_data[i], particle_data[i - 1]):
+        for (_, _, vx1, vy1), (x2, y2, vx2, vy2) in zip(particle_data[i - 1], particle_data[i]):
             
             # There is a collision if particle speed changes in the next time step
             if vx1 != vx2 or vy1 != vy2:
@@ -95,15 +97,20 @@ def get_collision_with_obstacle_count(times, particle_data, obstacle_radius, par
         x, y = collisions[0]
 
         # Check if the collision is with the obstacle
-        if math.sqrt(x ** 2 + y ** 2) <= obstacle_radius + particle_radius + epsilon:
+        center_to_center_distance = math.sqrt(x ** 2 + y ** 2)
+
+        if center_to_center_distance <= obstacle_radius + particle_radius + epsilon:
             count += 1
             collision_count[times[i]] = count
+
+
+    print(f"Obstacle collision count: {count}")
 
     return collision_count
 
 def get_first_collision_with_obstacle_count(times, particle_data, obstacle_radius, particle_radius):
     
-    epsilon = 1e-6
+    epsilon = 1e-5
 
     # Map of time to collision count
 
@@ -118,7 +125,7 @@ def get_first_collision_with_obstacle_count(times, particle_data, obstacle_radiu
 
         collisions = []
 
-        for particle_id, ((_, _, vx1, vy1), (x2, y2, vx2, vy2)) in enumerate(zip(particle_data[i], particle_data[i - 1])):
+        for particle_id, ((_, _, vx1, vy1), (x2, y2, vx2, vy2)) in enumerate(zip(particle_data[i - 1], particle_data[i])):
             
             # There is a collision if particle speed changes in the next time step
             if vx1 != vx2 or vy1 != vy2:

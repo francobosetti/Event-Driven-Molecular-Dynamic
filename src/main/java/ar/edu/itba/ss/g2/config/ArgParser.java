@@ -29,7 +29,8 @@ public class ArgParser {
                     new Option("om", "obstacle-mass", true, "Obstacle mass"),
 
                     // Simulation
-                    new Option("t", "time", true, "Max simulation time"));
+                    new Option("t", "time", true, "Max simulation time"),
+                    new Option("sk", "skip", true, "Events skipped per snapshot"));
 
     private final String[] args;
     private final Options options;
@@ -91,6 +92,27 @@ public class ArgParser {
         } else {
             System.err.println("Max simulation time is required");
             return null;
+        }
+
+        // Skip events
+        if (cmd.hasOption("sk")) {
+
+            int skipEvents;
+
+            try {
+                skipEvents = Integer.parseInt(cmd.getOptionValue("sk"));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid skip events: " + cmd.getOptionValue("sk"));
+                return null;
+            }
+
+            if (skipEvents <= 0) {
+                System.err.println("Skip events must be greater than 0");
+                return null;
+            }
+
+            builder.skipEvents(skipEvents);
+
         }
 
         // Simulation Domain

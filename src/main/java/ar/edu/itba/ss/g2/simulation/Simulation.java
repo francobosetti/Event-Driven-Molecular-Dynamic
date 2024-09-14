@@ -12,10 +12,12 @@ import java.util.stream.Collectors;
 public class Simulation {
 
     private final Map<Double, Set<Particle>> snapshots;
-    private final Set<Particle> particles;
+    private final Particle[] particles;
+    private Particle[] previousParticles;
     private final PriorityQueue<Event> collisionEventQueue;
 
     private double currentTime;
+    private double previousTime;
 
     private final double obstacleRadius;
     private final double obstacleCenter;
@@ -29,7 +31,15 @@ public class Simulation {
             double domainSize,
             boolean isCircularDomain,
             double obstacleRadius) {
-        this.particles = particles;
+
+        this.particles = new Particle[particles.size()];
+        this.previousParticles = new Particle[particles.size()];
+
+        for (Particle particle : particles) {
+            this.particles[particle.getId()] = particle;
+            this.previousParticles[particle.getId()] = new Particle(particle);
+        }
+
         this.domainSize = domainSize;
         this.isCircularDomain = isCircularDomain;
 
@@ -38,13 +48,22 @@ public class Simulation {
         this.hasObstacle = true;
 
         this.currentTime = 0;
+        this.previousTime = 0;
 
         this.snapshots = new HashMap<>();
         this.collisionEventQueue = new PriorityQueue<>();
     }
 
     public Simulation(Set<Particle> particles, double domainSize, boolean isCircularDomain) {
-        this.particles = particles;
+
+        this.particles = new Particle[particles.size()];
+        this.previousParticles = new Particle[particles.size()];
+
+        for (Particle particle : particles) {
+            this.particles[particle.getId()] = particle;
+            this.previousParticles[particle.getId()] = new Particle(particle);
+        }
+
         this.domainSize = domainSize;
         this.isCircularDomain = isCircularDomain;
 
@@ -53,20 +72,23 @@ public class Simulation {
         this.obstacleRadius = 0;
 
         this.currentTime = 0;
+        this.previousTime = 0;
 
         this.snapshots = new HashMap<>();
         this.collisionEventQueue = new PriorityQueue<>();
     }
 
-    public void run(double maxTime) {
+    public void run(double maxTime, int skipEvents) {
 
         // Save initial state
-        saveSnapshot(0);
+        saveSnapshot(0, 0, skipEvents);
 
         // Load initial collisions
         for (Particle p1 : particles) {
             addParticleCollisions(p1);
         }
+
+        int skipCounter = 0;
 
         while (currentTime < maxTime) {
             Event event = collisionEventQueue.poll();
@@ -79,6 +101,7 @@ public class Simulation {
             if (event.isInvalid()) {
                 continue;
             }
+
 
             double eventTime = event.getTime();
             double timeDiff = eventTime - currentTime;
@@ -99,17 +122,39 @@ public class Simulation {
                 Particle particleA = twoParticleEvent.getParticleA();
                 Particle particleB = twoParticleEvent.getParticleB();
 
+                skipCounter++;
+
+                if (skipCounter == skipEvents) {
+                    skipCounter = 0;
+
+                    // Save snapshot
+                    saveSnapshot(previousTime, currentTime, skipEvents);
+                }
+
                 addParticleCollisions(particleA);
                 addParticleCollisions(particleB);
 
             } else if (event instanceof OneParticleEvent oneParticleEvent) {
                 Particle particle = oneParticleEvent.getParticle();
 
+                saveSnapshot(previousTime, currentTime, skipEvents);
+
                 addParticleCollisions(particle);
             }
 
-            // Save snapshot
-            saveSnapshot(currentTime);
+
+            previousTime = currentTime;
+            // Set previous particles speed and position with current particles
+            // This has to be done without creating a new object as garbage collection will suffer
+            for (int i = 0; i < particles.length; i++) {
+                Particle previousParticle = previousParticles[i];
+                Particle currentParticle = particles[i];
+
+                previousParticle.setVx(currentParticle.getVx());
+                previousParticle.setVy(currentParticle.getVy());
+                previousParticle.setX(currentParticle.getX());
+                previousParticle.setY(currentParticle.getY());
+            }
         }
     }
 
@@ -189,11 +234,11 @@ public class Simulation {
         double vx = p1.getVx();
         double vy = p1.getVy();
 
-        double a = vx*vx + vy*vy;
-        double b = 2*(x0*vx + y0*vy);
-        double c = x0*x0 + y0*y0 - dr*dr;
-        double d = Math.sqrt(b*b-4*a*c);
-        return (-b+d)/(2*a);
+        double a = vx * vx + vy * vy;
+        double b = 2 * (x0 * vx + y0 * vy);
+        double c = x0 * x0 + y0 * y0 - dr * dr;
+        double d = Math.sqrt(b * b - 4 * a * c);
+        return (-b + d) / (2 * a);
     }
 
     // TODO: Add  circular wall collisions
@@ -240,9 +285,15 @@ public class Simulation {
         }
     }
 
-    private void saveSnapshot(double time) {
+    private void saveSnapshot(double previousTime, double time, int skipEvents) {
         Set<Particle> particlesCopy =
-                particles.stream().map(Particle::new).collect(Collectors.toSet());
+                Set.of(particles).stream().map(Particle::new).collect(Collectors.toSet());
         snapshots.put(time, particlesCopy);
+
+        if (previousTime != currentTime && skipEvents > 1) {
+            Set<Particle> previousParticlesCopy =
+                    Set.of(previousParticles).stream().map(Particle::new).collect(Collectors.toSet());
+            snapshots.put(previousTime, previousParticlesCopy);
+        }
     }
 }

@@ -23,6 +23,8 @@ public class Configuration {
 
     private final double maxTime;
 
+    private final int skipEvents;
+
     private final String outputDirectory;
 
     private Configuration(Builder builder) {
@@ -42,6 +44,8 @@ public class Configuration {
         this.isObstacleFree = builder.isObstacleFree;
 
         this.maxTime = builder.maxTime;
+
+        this.skipEvents = builder.skipEvents;
 
         this.outputDirectory = builder.outputDirectory;
     }
@@ -109,6 +113,10 @@ public class Configuration {
         return maxTime;
     }
 
+    public int getSkipEvents() {
+        return skipEvents;
+    }
+
     public String getOutputDirectory() {
         return outputDirectory;
     }
@@ -167,6 +175,8 @@ public class Configuration {
 
         private double maxTime;
 
+        private int skipEvents = 1;
+
         private String outputDirectory;
 
         public Builder() {}
@@ -223,6 +233,11 @@ public class Configuration {
 
         public Builder maxTime(double maxTime) {
             this.maxTime = maxTime;
+            return this;
+        }
+
+        public Builder skipEvents(int skipEvents) {
+            this.skipEvents = skipEvents;
             return this;
         }
 
