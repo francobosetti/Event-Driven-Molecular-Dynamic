@@ -79,7 +79,7 @@ public class App {
         double obstacleX = configuration.isDomainCircular() ? 0 : domainSize / 2;
         double obstacleY = configuration.isDomainCircular() ? 0 : domainSize / 2;
 
-        long maxEvents = configuration.getMaxEvents();
+        double maxTime = configuration.getMaxTime();
 
         Simulation simulation;
 
@@ -110,7 +110,7 @@ public class App {
 
         System.out.println("Running simulation...");
 
-        simulation.run(maxEvents);
+        simulation.run(maxTime);
 
         System.out.println("Simulation finished, writing output...");
 

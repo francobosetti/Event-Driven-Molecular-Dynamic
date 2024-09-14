@@ -29,7 +29,7 @@ public class ArgParser {
                     new Option("om", "obstacle-mass", true, "Obstacle mass"),
 
                     // Simulation
-                    new Option("e", "events", true, "Maximum events"));
+                    new Option("t", "time", true, "Max simulation time"));
 
     private final String[] args;
     private final Options options;
@@ -70,26 +70,26 @@ public class ArgParser {
         }
 
         // Max simulation time
-        if (cmd.hasOption("e")) {
+        if (cmd.hasOption("t")) {
 
-            long maxEvents;
+            double maxTime;
 
             try {
-                maxEvents = Long.parseLong(cmd.getOptionValue("e"));
+                maxTime = Double.parseDouble(cmd.getOptionValue("t"));
             } catch (NumberFormatException e) {
-                System.err.println("Invalid max events: " + cmd.getOptionValue("e"));
+                System.err.println("Invalid max simulation time: " + cmd.getOptionValue("t"));
                 return null;
             }
 
-            if (maxEvents <= 0) {
-                System.err.println("Max events must be greater than 0");
+            if (maxTime <= 0) {
+                System.err.println("Max simulation time must be greater than 0");
                 return null;
             }
 
-            builder.maxEvents(maxEvents);
+            builder.maxTime(maxTime);
 
         } else {
-            System.err.println("Max events is required");
+            System.err.println("Max simulation time is required");
             return null;
         }
 

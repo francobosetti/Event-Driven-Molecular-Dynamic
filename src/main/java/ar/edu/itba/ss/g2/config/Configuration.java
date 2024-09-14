@@ -21,7 +21,7 @@ public class Configuration {
     private final double obstacleRadius;
     private final boolean isObstacleFree;
 
-    private final long maxEvents;
+    private final double maxTime;
 
     private final String outputDirectory;
 
@@ -41,7 +41,7 @@ public class Configuration {
         this.obstacleRadius = builder.obstacleRadius;
         this.isObstacleFree = builder.isObstacleFree;
 
-        this.maxEvents = builder.maxEvents;
+        this.maxTime = builder.maxTime;
 
         this.outputDirectory = builder.outputDirectory;
     }
@@ -105,8 +105,8 @@ public class Configuration {
         return isObstacleFree;
     }
 
-    public long getMaxEvents() {
-        return maxEvents;
+    public double getMaxTime() {
+        return maxTime;
     }
 
     public String getOutputDirectory() {
@@ -138,8 +138,8 @@ public class Configuration {
                 + obstacleRadius
                 + ", isObstacleFree="
                 + isObstacleFree
-                + ", maxEvents="
-                + maxEvents
+                + ", maxTime="
+                + maxTime
                 + ", outputDirectory='"
                 + outputDirectory
                 + '\''
@@ -165,7 +165,7 @@ public class Configuration {
         private double obstacleRadius;
         private boolean isObstacleFree;
 
-        private long maxEvents;
+        private double maxTime;
 
         private String outputDirectory;
 
@@ -221,8 +221,8 @@ public class Configuration {
             return this;
         }
 
-        public Builder maxEvents(long maxTime) {
-            this.maxEvents = maxTime;
+        public Builder maxTime(double maxTime) {
+            this.maxTime = maxTime;
             return this;
         }
 
