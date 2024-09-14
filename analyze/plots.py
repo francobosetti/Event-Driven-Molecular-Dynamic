@@ -4,8 +4,6 @@ def plot_collision_with_obstacle_vs_time(collision_counts, labels, text, filenam
 
     fig, ax = plt.subplots()
 
-
-
     # Collision counts is a list of dict [time, count].
     # e.g. {0: 0, 1: 1, 2: 20}
     for i, collision_count in enumerate(collision_counts):
@@ -21,11 +19,11 @@ def plot_collision_with_obstacle_vs_time(collision_counts, labels, text, filenam
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Collision count")
 
-    # Ticks every 10 %
-    max_times = [max(collision_count.keys()) for collision_count in collision_counts]
-    max_time = float(max(max_times))
-    step = max_time / 10
-    steps = [i * step for i in range(11)]
+    # 10 Ticks
+    max_time = max([max(map(float, collision_count.keys())) for collision_count in collision_counts])
+    min_time = min([min(map(float, collision_count.keys())) for collision_count in collision_counts])
+    step = (max_time - min_time) / 4  # 9 intervals create 10 ticks
+    steps = [round(min_time + i * step, 2) for i in range(5)]
     ax.set_xticks(steps)
 
     # Shrinks the plot by 20%

@@ -18,7 +18,7 @@ def execute_simulation(
     domain_radius,
     obstacle_radius,
     speed,
-    e_max,
+    t_max,
     repetition,
     root_dir="data",
 ):
@@ -39,13 +39,8 @@ def execute_simulation(
     os.system(
         "java -jar target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar -obs fixed "
         + f"-out {unique_dir} -N {N} -r {particle_radius} -m {particle_mass} -v {speed} "
-        + f"-e {e_max} -sz {domain_radius} -or {obstacle_radius} -d {domain_type}"
-    )
-
-    print(
-                "java -jar target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar -obs fixed "
-        + f"-out {unique_dir} -N {N} -r {particle_radius} -m {particle_mass} -v {speed} "
-        + f"-e {e_max} -sz {domain_radius} -or {obstacle_radius} -d {domain_type}"
+        + f"-t {t_max} -sz {domain_radius} -or {obstacle_radius} -d {domain_type} "
+        + "> /dev/null"
     )
 
     print(f"Simulation {name} completed")
@@ -61,7 +56,7 @@ def execute_simulations(
     domain_radius,
     obstacle_radius,
     speeds,
-    e_max,
+    t_max,
     repetitions,
     root_dir="data",
 ):
@@ -86,7 +81,7 @@ def execute_simulations(
                         domain_radius,
                         obstacle_radius,
                         v,
-                        e_max,
+                        t_max,
                         repetition,
                         root_dir + "/simulations",
                     )
@@ -119,13 +114,12 @@ def execute_simulations(
                     times, particle_data, obstacle_radius, particle_radius
                 )
 
-
                 # Append the parsed data to results
                 results.append(
                     {
                         "parameters": parameters,
                         "collision_count": collision_count,
-                        "first_collision_count": first_collision_count
+                        "first_collision_count": first_collision_count,
                     }
                 )
 
@@ -139,7 +133,6 @@ def execute_simulations(
 
 
 def plot_results(results, output_dir="data"):
-    
     # Create a list of collision counts for speeds, ignore repetitions
     found_speeds = set()
     collision_counts_with_obstacle = []
@@ -176,10 +169,6 @@ def plot_results(results, output_dir="data"):
     )
 
 
-
-
-
-
 if __name__ == "__main__":
 
     # If arg is generate, generate data
@@ -191,18 +180,18 @@ if __name__ == "__main__":
 
     if sys.argv[1] == "generate":
 
-        N = 1
+        N = 100
         particle_radius = 0.001
         particle_mass = 1
 
         domain_type = "circular"
         domain_radius = 0.1 / 2
 
-        obstacle_radius = 0.04
+        obstacle_radius = 0.005
 
         speeds = [1, 3, 6, 10]
 
-        e_max = 1000
+        t_max = 5
 
         repetitions = 1
 
@@ -214,7 +203,7 @@ if __name__ == "__main__":
             domain_radius,
             obstacle_radius,
             speeds,
-            e_max,
+            t_max,
             repetitions,
             root_dir="data",
         )

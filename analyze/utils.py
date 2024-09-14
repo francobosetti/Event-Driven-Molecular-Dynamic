@@ -97,8 +97,7 @@ def get_collision_with_obstacle_count(times, particle_data, obstacle_radius, par
         # Check if the collision is with the obstacle
         if math.sqrt(x ** 2 + y ** 2) <= obstacle_radius + particle_radius + epsilon:
             count += 1
-
-        collision_count[times[i]] = count
+            collision_count[times[i]] = count
 
     return collision_count
 
@@ -135,13 +134,12 @@ def get_first_collision_with_obstacle_count(times, particle_data, obstacle_radiu
         if particle_id in already_collided_particles:
             continue
 
-        already_collided_particles.add(particle_id)
 
         # Check if the collision is with the obstacle
         if math.sqrt(x ** 2 + y ** 2) <= obstacle_radius + particle_radius + epsilon:
+            already_collided_particles.add(particle_id)
             count += 1
-
-        collision_count[times[i]] = count
+            collision_count[times[i]] = count
 
     return collision_count
 
