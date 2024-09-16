@@ -217,13 +217,15 @@ def plot_results(results, output_dir="data"):
     first_collision_counts_with_obstacle = []
     labels = []
 
-
     # Dict of t -> list of slope
     slopes = {}
     # Dict of t -> time to all collisions
     time_to_all_collisions = {}
 
-    first_collision_limit = 0
+    N = results[0]["parameters"]["particle_count"]
+    first_collision_limit = N * 0.9
+    particle_radius = results[0]["parameters"]["particle_radius"]
+    particle_mass = results[0]["parameters"]["particle_mass"]
 
     for result in results:
         parameters = result["parameters"]
@@ -243,7 +245,6 @@ def plot_results(results, output_dir="data"):
 
         # Time to all collisions
         max_time = max(first_collision_count.keys())
-        first_collision_limit = int(parameters["particle_count"] * 0.9)
         if first_collision_count[max_time] < first_collision_limit:
             print(
                 f"Simulation did not complete for v={v}, t={max_time}, count={first_collision_count[max_time]}"
@@ -275,11 +276,15 @@ def plot_results(results, output_dir="data"):
 
     temperatures = list(slopes.keys())
 
+    # N, r, and m
+    text = f"N={N}\nr={particle_radius} m\nm={particle_mass} kg"
+
     # Plot collision slope vs temperature
     plots.plot_collision_slope_vs_temperature(
         mean_slopes,
         std_slopes,
         temperatures,
+        text,
         filename=f"{output_dir}/collision_slope_vs_temperature.png",
     )
 
@@ -297,6 +302,7 @@ def plot_results(results, output_dir="data"):
         mean_times,
         std_times,
         temperatures,
+        text,
         filename=f"{output_dir}/time_to_first_collision_vs_temperature.png",
     )
 
@@ -304,6 +310,7 @@ def plot_results(results, output_dir="data"):
     plots.plot_collision_with_obstacle_vs_time(
         collision_counts_with_obstacle,
         labels,
+        text,
         filename=f"{output_dir}/collision_count_vs_time.png",
     )
 
@@ -311,6 +318,7 @@ def plot_results(results, output_dir="data"):
         first_collision_counts_with_obstacle,
         labels,
         first_collision_limit,
+        text,
         filename=f"{output_dir}/collided_particles_count_vs_time.png",
     )
 
