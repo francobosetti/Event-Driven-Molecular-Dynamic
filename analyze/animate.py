@@ -193,7 +193,7 @@ if __name__ == "__main__":
     output_file = sys.argv[1] + "/particle_animation.mp4"
 
     static_config = utils.load_static_data(static_file)
-    time_steps, particle_data = utils.load_dynamic_data(dynamic_file)
+    time_steps, particle_data = utils.load_dynamic_data(dynamic_file, static_config["particle_count"], static_config["event_count"])
     animate_particles(
         static_config,
         time_steps,
