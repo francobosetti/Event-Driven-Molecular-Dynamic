@@ -21,6 +21,7 @@ def load_static_data(static_file):
             obstacle_mass = float(file.readline().strip())
         else:
             obstacle_mass = None
+        event_count = int(file.readline().strip())
 
     return {
         "particle_count": particle_count,
@@ -32,42 +33,65 @@ def load_static_data(static_file):
         "obstacle_type": obstacle_type,
         "obstacle_radius": obstacle_radius,
         "obstacle_mass": obstacle_mass,
+        "event_count": event_count,
     }
 
+import numpy as np
 
 # Load dynamic data
-def load_dynamic_data(dynamic_file):
+def load_dynamic_data(dynamic_file, num_particles, num_time_steps):
+    
+
+    # Preallocate the 3D array: (num_time_steps, num_particles, 4)
+    particle_data = np.zeros((num_time_steps, num_particles, 4), dtype=np.float64)
+    times = np.zeros(num_time_steps, dtype=np.float64)
+
+    # Second pass: fill the preallocated arrays
     with open(dynamic_file, "r") as file:
-        lines = file.readlines()
+        current_time_step = -1
+        current_particle = 0
 
-    times = []
-    particle_data = []
+        for line in file:
+            parts = line.strip().split()
 
-    current_time = None
-    current_particles = []
+            if len(parts) == 1:  # New time step
+                current_time_step += 1
+                current_particle = 0
+                times[current_time_step] = float(parts[0])
+            else:
+                particle_data[current_time_step, current_particle] = list(map(float, parts))
 
-    for line in lines:
-        parts = line.strip().split()
-
-        if len(parts) == 1:  # New time step
-            if current_time is not None:
-                times.append(current_time)
-                particle_data.append(current_particles)
-            current_time = float(parts[0])
-            current_particles = []
-        else:
-            x, y, vx, vy = map(float, parts)
-            current_particles.append((x, y, vx, vy))
-
-    # Append the last time step
-    if current_time is not None:
-        times.append(current_time)
-        particle_data.append(current_particles)
 
     return times, particle_data
 
+def get_one_particle_collisions(times, particle_data):
+    collision_times = {}
+
+    # Particle velocities in each time step
+    vels_t1 = particle_data[:-1, :, 2:]  # velocities at time t1 (vx1, vy1)
+    vels_t2 = particle_data[1:, :, 2:]   # velocities at time t2 (vx2, vy2)
+
+    # Boolean array where True indicates a change in velocity, i.e., a collision
+    velocity_change = np.any(vels_t1 != vels_t2, axis=2)
+
+    for i, changes in enumerate(velocity_change):
+        # Get indices of particles with velocity change
+        colliding_particles = np.where(changes)[0]
+
+        # Skip if no collision or more than one particle collides (as it implies a multi-particle collision)
+        if len(colliding_particles) != 1:
+            continue
+
+        particle_id = colliding_particles[0]
+        x1, y1, vx1, vy1 = particle_data[i, particle_id]
+        x2, y2, vx2, vy2 = particle_data[i + 1, particle_id]
+
+        collision_times[times[i + 1]] = (particle_id, ((x1, y1, vx1, vy1), (x2, y2, vx2, vy2)))
+
+    return collision_times
+
 # Returns a dict [time, (id, ((x1, y1, vx1, vy1), (x2, y2, vx2, vy2)))]
-def get_one_particle_collisions(
+def get_one_particle_collisions_slow(
     times, particle_data
 ):
 
