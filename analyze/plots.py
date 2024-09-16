@@ -51,3 +51,14 @@ def plot_collision_with_obstacle_vs_time(collision_counts, labels, text, filenam
     plt.close()
 
 
+def plot_collision_slope_vs_temperature(mean_slopes, std_slopes, temperatures, filename="collision_slope_vs_temperature.png"):
+
+    fig, ax = plt.subplots()
+
+    ax.errorbar(temperatures, mean_slopes, yerr=std_slopes, fmt="o")
+
+    ax.set_xlabel("Temperature")
+    ax.set_ylabel("Collision slope")
+
+    plt.savefig(filename)
+    plt.close()
