@@ -88,7 +88,7 @@ public class App {
             double obstacleMass = configuration.getObstacleMass();
             Particle obstacle =
                     new Particle(
-                            particleCount + 1,
+                            particleCount,
                             obstacleX,
                             obstacleY,
                             0.0,

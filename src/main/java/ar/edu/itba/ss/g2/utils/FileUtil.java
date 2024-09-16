@@ -28,7 +28,11 @@ public class FileUtil {
         // Static
         Configuration configuration = output.configuration();
         try (FileWriter writer = new FileWriter(directory + "/static.txt")) {
-            writer.write(configuration.getParticleCount() + "\n");
+            int particleCount = configuration.getParticleCount();
+            if (configuration.isObstacleFree()) {
+                particleCount += 1;
+            }
+            writer.write(particleCount + "\n");
             writer.write(configuration.getParticleRadius() + "\n");
             writer.write(configuration.getParticleMass() + "\n");
             writer.write(configuration.getInitialVelocity() + "\n");
