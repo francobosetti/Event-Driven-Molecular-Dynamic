@@ -4,8 +4,10 @@ import shutil
 import plots
 import utils
 import os
+import subprocess
 import json
 import numpy as np
+
 
 def execute_simulation(
     N,
@@ -27,11 +29,47 @@ def execute_simulation(
 
     os.makedirs(unique_dir, exist_ok=True)
 
-    os.system(
-        f"java -Xmx{memory_gigs}G -Xms{memory_gigs}G -jar target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar -obs fixed "
-        + f"-out {unique_dir} -N {N} -r {particle_radius} -m {particle_mass} -v {speed} "
-        + f"-t {t_max} -sz {domain_radius} -or {obstacle_radius} -d {domain_type} > /dev/null"
-    )
+    # Build the command
+    command = [
+        "java",
+        f"-Xmx{memory_gigs}G",  # Maximum heap size
+        f"-Xms{memory_gigs}G",  # Initial heap size
+        "-jar",
+        "target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar",
+        "-obs",
+        "fixed",
+        "-out",
+        unique_dir,
+        "-N",
+        str(N),
+        "-r",
+        str(particle_radius),
+        "-m",
+        str(particle_mass),
+        "-v",
+        str(speed),
+        "-t",
+        str(t_max),
+        "-sz",
+        str(domain_radius),
+        "-or",
+        str(obstacle_radius),
+        "-d",
+        str(domain_type),
+        "-sk",
+        "100000000",
+    ]
+
+    try:
+        print(f"Running simulation with speed {speed}, repetition {repetition}")
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        print(
+            f"Simulation completed successfully for speed {speed}, repetition {repetition}"
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Simulation failed for speed {speed}, repetition {repetition}")
+        print(f"Error Output: {e.stderr}")
+        raise e
 
     return unique_dir
 
@@ -52,11 +90,12 @@ def execute_simulations(
 ):
 
     available_memory = 12
-    memory_per_simulation = available_memory if not is_concurrent else int(available_memory / max_workers)
-    
+    memory_per_simulation = (
+        available_memory if not is_concurrent else int(available_memory / max_workers)
+    )
+
     def submit_simulation(v, repetition):
         """Helper function to submit or execute simulation"""
-        print(f"Executing simulation with v={v}, repetition={repetition}")
         return execute_simulation(
             N,
             particle_radius,
@@ -75,7 +114,9 @@ def execute_simulations(
     dirs = []
 
     if is_concurrent:
-        print(f"Executing {remaining_simulations} simulations concurrently, with {max_workers} workers")
+        print(
+            f"Executing {remaining_simulations} simulations concurrently, with {max_workers} workers"
+        )
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [
                 executor.submit(submit_simulation, v, repetition)
@@ -88,19 +129,20 @@ def execute_simulations(
                     dir = future.result()
                     dirs.append(dir)
                     remaining_simulations -= 1
-                    print(f"Completed simulation on {dir}, {remaining_simulations} remaining")
                 except Exception as e:
                     print(f"An error occurred during simulation: {e}")
 
     else:
+        print(f"Executing {remaining_simulations} simulations")
         for v in speeds:
             for repetition in range(repetitions):
-                print(f"Executing {remaining_simulations} simulations")
                 try:
                     dir = submit_simulation(v, repetition)
                     dirs.append(dir)
                     remaining_simulations -= 1
-                    print(f"Completed simulation on {dir}, {remaining_simulations} remaining")
+                    print(
+                        f"Completed simulation on {dir}, {remaining_simulations} remaining"
+                    )
                 except Exception as e:
                     print(f"An error occurred during simulation: {e}")
 
@@ -112,14 +154,18 @@ def execute_simulations(
     for unique_dir in dirs:
         try:
 
+            print(f"Reading simulation on {unique_dir}")
             # Parse the static and dynamic files from the simulation
             static_file = os.path.join(unique_dir, "static.txt")
             dynamic_file = os.path.join(unique_dir, "dynamic.txt")
 
             # Parse static and dynamic files
             parameters = utils.load_static_data(static_file)
-            times, particle_data = utils.load_dynamic_data(dynamic_file)
+            times, particle_data = utils.load_dynamic_data(
+                dynamic_file, parameters["particle_count"], parameters["event_count"]
+            )
 
+            print(f"Analyzing simulation on {unique_dir}")
             # TODO: analyze results
             collision_count = utils.get_collision_with_obstacle_count(
                 times, particle_data, obstacle_radius, particle_radius
@@ -127,7 +173,11 @@ def execute_simulations(
             first_collision_count = utils.get_first_collision_with_obstacle_count(
                 times, particle_data, obstacle_radius, particle_radius
             )
-            temperature = utils.get_system_temperature(particle_data, parameters["particle_mass"])
+            temperature = utils.get_system_temperature(
+                particle_data, parameters["particle_mass"]
+            )
+
+            print(f"Collision count: {max(collision_count.values())}")
 
             # 5 digits of precision
             temperature = round(temperature, 5)
@@ -138,18 +188,19 @@ def execute_simulations(
                     "parameters": parameters,
                     "collision_count": collision_count,
                     "first_collision_count": first_collision_count,
-                    "temperature": temperature
+                    "temperature": temperature,
                 }
             )
 
-            print(f"Processed simulation on {unique_dir}, {remaining_simulations} remaining")
             remaining_simulations -= 1
+            print(
+                f"Processed simulation on {unique_dir}, {remaining_simulations} remaining"
+            )
 
         except Exception as e:
             print(f"An error occurred during processing: {e}")
 
     # Delete root_dir/simulations
-
     try:
         print("Cleaning up")
         shutil.rmtree(root_dir + "/simulations", ignore_errors=True)
@@ -166,29 +217,45 @@ def plot_results(results, output_dir="data"):
     first_collision_counts_with_obstacle = []
     labels = []
 
+
     # Dict of t -> list of slope
     slopes = {}
+    # Dict of t -> time to all collisions
+    time_to_all_collisions = {}
+
+    first_collision_limit = 0
 
     for result in results:
         parameters = result["parameters"]
         v = parameters["initial_velocity"]
-
 
         collision_count = result["collision_count"]
         first_collision_count = result["first_collision_count"]
 
         # Collision counts is a list of dict [time, count].
         # Calculate the slope of the collision count
-        times = [ float(time) for time in collision_count.keys()]
+        times = [float(time) for time in collision_count.keys()]
         counts = list(collision_count.values())
 
         # Calculate the slope of the collision count
         slope = np.polyfit(times, counts, 1)[0]
         temperature = result["temperature"]
 
+        # Time to all collisions
+        max_time = max(first_collision_count.keys())
+        first_collision_limit = int(parameters["particle_count"] * 0.9)
+        if first_collision_count[max_time] < first_collision_limit:
+            print(
+                f"Simulation did not complete for v={v}, t={max_time}, count={first_collision_count[max_time]}"
+            )
+
         if temperature not in slopes:
             slopes[temperature] = []
         slopes[temperature].append(slope)
+
+        if temperature not in time_to_all_collisions:
+            time_to_all_collisions[temperature] = []
+        time_to_all_collisions[temperature].append(float(max_time))
 
         if v in found_speeds:
             continue
@@ -198,8 +265,6 @@ def plot_results(results, output_dir="data"):
         collision_counts_with_obstacle.append(collision_count)
         first_collision_counts_with_obstacle.append(first_collision_count)
         labels.append(f"v={v} (m/s)")
-
-
 
     mean_slopes = []
     std_slopes = []
@@ -218,19 +283,35 @@ def plot_results(results, output_dir="data"):
         filename=f"{output_dir}/collision_slope_vs_temperature.png",
     )
 
+    mean_times = []
+    std_times = []
+
+    for temperature, times in time_to_all_collisions.items():
+        mean_times.append(np.mean(times))
+        std_times.append(np.std(times))
+
+    temperatures = list(time_to_all_collisions.keys())
+
+    # Plot time to first collision vs temperature
+    plots.plot_time_to_first_collision_vs_temperature(
+        mean_times,
+        std_times,
+        temperatures,
+        filename=f"{output_dir}/time_to_first_collision_vs_temperature.png",
+    )
+
     # Plot collision count vs time
     plots.plot_collision_with_obstacle_vs_time(
         collision_counts_with_obstacle,
         labels,
-        "Collision count vs time",
         filename=f"{output_dir}/collision_count_vs_time.png",
     )
 
-    plots.plot_collision_with_obstacle_vs_time(
+    plots.plot_collided_particles_count_vs_time(
         first_collision_counts_with_obstacle,
         labels,
-        "First collision count vs time",
-        filename=f"{output_dir}/first_collision_count_vs_time.png",
+        first_collision_limit,
+        filename=f"{output_dir}/collided_particles_count_vs_time.png",
     )
 
 
@@ -254,9 +335,9 @@ if __name__ == "__main__":
 
         obstacle_radius = 0.005
 
-        speeds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        speeds = [1, 3, 6, 10]
 
-        t_max = 0.3
+        t_max = 3
 
         repetitions = 10
 
@@ -292,4 +373,4 @@ if __name__ == "__main__":
             plot_results(results, output_dir="data")
 
     else:
-        print("Usage: python analyze.py [generate|plot]")
+        print("Usage: python analyze.py <generate|plot> [concurrent_workers] ")
