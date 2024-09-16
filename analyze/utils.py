@@ -60,6 +60,7 @@ def load_dynamic_data(dynamic_file, num_particles, num_time_steps):
                 times[current_time_step] = float(parts[0])
             else:
                 particle_data[current_time_step, current_particle] = list(map(float, parts))
+                #current_particle += 1
 
 
     return times, particle_data
