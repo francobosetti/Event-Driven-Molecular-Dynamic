@@ -136,6 +136,8 @@ def get_collision_with_wall(times, particle_data, domain_radius, particle_radius
         if distance_to_wall <= epsilon:
             wall_collisions[time] = (id, ((x1, y1, vx1, vy1), (x2, y2, vx2, vy2)))
 
+    return wall_collisions
+
 
 def get_collision_with_obstacle_count(
     times, particle_data, obstacle_radius, particle_radius
