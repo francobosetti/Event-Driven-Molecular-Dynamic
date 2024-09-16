@@ -4,6 +4,7 @@ import ar.edu.itba.ss.g2.config.Configuration;
 import ar.edu.itba.ss.g2.model.Output;
 import ar.edu.itba.ss.g2.model.Particle;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -48,11 +49,12 @@ public class FileUtil {
                 writer.write("obstacle\n");
                 writer.write(configuration.getObstacleRadius() + "\n");
             }
+            writer.write(output.snapshots().size() + "\n");
         }
 
         // dynamic
         Map<Double, Set<Particle>> snapshots = output.snapshots();
-        try (FileWriter writer = new FileWriter(directory + "/dynamic.txt")) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(directory + "/dynamic.txt"), 128 * 1024)) {
             List<Entry<Double, Set<Particle>>> entries = new ArrayList<>(snapshots.entrySet());
             entries.sort(Comparator.comparingDouble(Entry::getKey));
 
