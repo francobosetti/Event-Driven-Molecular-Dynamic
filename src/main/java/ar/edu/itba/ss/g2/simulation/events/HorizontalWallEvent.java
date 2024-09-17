@@ -9,6 +9,7 @@ public class HorizontalWallEvent extends OneParticleEvent {
 
     @Override
     public void resolveCollision() {
+        Particle particle = getParticles()[0];
         double vy = particle.getVy();
         particle.setVy(-vy);
 

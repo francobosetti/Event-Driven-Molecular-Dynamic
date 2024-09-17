@@ -9,6 +9,7 @@ public class CircularWallEvent extends OneParticleEvent {
 
     @Override
     public void resolveCollision() {
+        Particle particle = getParticles()[0];
 
         // alpha: angle between the normal and the x-axis
         // the position versor is the same as the normal versor

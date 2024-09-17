@@ -123,29 +123,8 @@ public class Simulation {
             event.resolveCollision();
 
             // Recalculate future collisions
-            // TODO: refactor this aberracion absoluta
-            if (event instanceof TwoParticleEvent twoParticleEvent) {
-                Particle particleA = twoParticleEvent.getParticleA();
-                Particle particleB = twoParticleEvent.getParticleB();
-
-                skipCounter++;
-
-                if (skipCounter == skipEvents) {
-                    skipCounter = 0;
-
-                    // Save snapshot
-                    saveSnapshot(previousTime, currentTime, skipEvents);
-                }
-
-                addParticleCollisions(particleA);
-                addParticleCollisions(particleB);
-
-            } else if (event instanceof OneParticleEvent oneParticleEvent) {
-                Particle particle = oneParticleEvent.getParticle();
-
-                saveSnapshot(previousTime, currentTime, skipEvents);
-
-                addParticleCollisions(particle);
+            for (Particle p : event.getParticles()) {
+                addParticleCollisions(p);
             }
 
 

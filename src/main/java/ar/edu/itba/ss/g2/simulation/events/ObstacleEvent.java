@@ -15,6 +15,7 @@ public class ObstacleEvent extends OneParticleEvent {
 
     @Override
     public void resolveCollision() {
+        Particle particle = getParticles()[0];
 
         double x = particle.getX();
         double y = particle.getY();

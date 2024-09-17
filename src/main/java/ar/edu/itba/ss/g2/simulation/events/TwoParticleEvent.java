@@ -3,37 +3,28 @@ package ar.edu.itba.ss.g2.simulation.events;
 import ar.edu.itba.ss.g2.model.Particle;
 
 public class TwoParticleEvent extends Event {
-    private final Particle a;
     private final int collisionCountA;
-    private final Particle b;
     private final int collisionCountB;
 
-    public TwoParticleEvent(
-            double time, Particle a, Particle b) {
-        super(time);
-        this.a = a;
+    public TwoParticleEvent(double time, Particle a, Particle b) {
+        super(time, new Particle[]{a, b});
         this.collisionCountA = a.getCollisionCount();
-        this.b = b;
         this.collisionCountB = b.getCollisionCount();
-    }
-
-    // return the first particle
-    public Particle getParticleA() {
-        return a;
-    }
-
-    // return the second particle
-    public Particle getParticleB() {
-        return b;
     }
 
     @Override
     public boolean isInvalid() {
+        Particle a = getParticles()[0];
+        Particle b = getParticles()[1];
+
         return a.getCollisionCount() != collisionCountA || b.getCollisionCount() != collisionCountB;
     }
 
     @Override
     public void resolveCollision() {
+        Particle a = getParticles()[0];
+        Particle b = getParticles()[1];
+
         // center-to-center distance (sigma) between the two particles
         double sigma =
                 Math.sqrt(Math.pow(b.getX() - a.getX(), 2) + Math.pow(b.getY() - a.getY(), 2));

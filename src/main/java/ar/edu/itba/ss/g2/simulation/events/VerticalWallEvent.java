@@ -9,6 +9,7 @@ public class VerticalWallEvent extends OneParticleEvent {
 
     @Override
     public void resolveCollision() {
+        Particle particle = getParticles()[0];
         double vx = particle.getVx();
         particle.setVx(-vx);
 
