@@ -65,8 +65,8 @@ if __name__ == "__main__":
         dir = utils.execute_simulation(N, r, m, domain, sz, o_r, v, t, i, 12, out, obs, o_m, 100)
         static_file = dir + "/static.txt"
         static_config = utils.load_static_data(static_file)
-        dynamic_file = dir + "/dynamic.txt"
-        displacement = calculate_big_particle_squared_dispacement(dynamic_file, static_config["particle_count"], static_config["event_count"], discrete_times=times)
+        snapshots_file = dir + "/snapshots.txt"
+        displacement = calculate_big_particle_squared_dispacement(snapshots_file, static_config["particle_count"], static_config["event_count"], discrete_times=times)
         all_displacements.append(displacement)
     
     
