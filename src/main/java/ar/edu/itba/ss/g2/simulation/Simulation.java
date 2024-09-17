@@ -22,6 +22,7 @@ public class Simulation {
     private final double obstacleRadius;
     private final double obstacleCenter;
     private final boolean hasObstacle;
+    private final Particle obstacle;
 
     private final double domainSize;
     private final boolean isCircularDomain;
@@ -46,6 +47,7 @@ public class Simulation {
         this.obstacleRadius = obstacleRadius;
         this.obstacleCenter = isCircularDomain ? 0 : domainSize / 2;
         this.hasObstacle = true;
+        this.obstacle = new Particle(0, obstacleCenter, obstacleCenter, 0.0, 0.0, obstacleRadius, 0.0);
 
         this.currentTime = 0;
         this.previousTime = 0;
@@ -68,6 +70,8 @@ public class Simulation {
         this.isCircularDomain = isCircularDomain;
 
         this.hasObstacle = false;
+        this.obstacle = null;
+
         this.obstacleCenter = isCircularDomain ? 0 : domainSize / 2;
         this.obstacleRadius = 0;
 
@@ -215,11 +219,7 @@ public class Simulation {
     }
 
     private Double timeToObstacleCollision(Particle p1) {
-        // TODO: medio feo
-        Particle obstacle =
-                new Particle(0, obstacleCenter, obstacleCenter, 0.0, 0.0, obstacleRadius, 0.0);
-
-        return timeToParticleCollision(p1, obstacle);
+        return timeToParticleCollision(p1, this.obstacle);
     }
 
     private Double timeToCircularWallCollision(Particle p1) {
