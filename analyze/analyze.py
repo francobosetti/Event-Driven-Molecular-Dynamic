@@ -9,71 +9,6 @@ import json
 import numpy as np
 
 
-def execute_simulation(
-    N,
-    particle_radius,
-    particle_mass,
-    domain_type,
-    domain_radius,
-    obstacle_radius,
-    speed,
-    t_max,
-    repetition,
-    memory_gigs,
-    root_dir="data",
-):
-
-    # Create a unique directory based on the parameters
-    name = f"v-{speed}_it-{repetition}"
-    unique_dir = os.path.join(root_dir, name)
-
-    os.makedirs(unique_dir, exist_ok=True)
-
-    # Build the command
-    command = [
-        "java",
-        f"-Xmx{memory_gigs}G",  # Maximum heap size
-        f"-Xms{memory_gigs}G",  # Initial heap size
-        "-jar",
-        "target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar",
-        "-obs",
-        "fixed",
-        "-out",
-        unique_dir,
-        "-N",
-        str(N),
-        "-r",
-        str(particle_radius),
-        "-m",
-        str(particle_mass),
-        "-v",
-        str(speed),
-        "-t",
-        str(t_max),
-        "-sz",
-        str(domain_radius),
-        "-or",
-        str(obstacle_radius),
-        "-d",
-        str(domain_type),
-        "-sk",
-        "100000000",
-    ]
-
-    try:
-        print(f"Running simulation with speed {speed}, repetition {repetition}")
-        subprocess.run(command, check=True, capture_output=True, text=True)
-        print(
-            f"Simulation completed successfully for speed {speed}, repetition {repetition}"
-        )
-    except subprocess.CalledProcessError as e:
-        print(f"Simulation failed for speed {speed}, repetition {repetition}")
-        print(f"Error Output: {e.stderr}")
-        raise e
-
-    return unique_dir
-
-
 def execute_simulations(
     N,
     particle_radius,
@@ -96,7 +31,7 @@ def execute_simulations(
 
     def submit_simulation(v, repetition):
         """Helper function to submit or execute simulation"""
-        return execute_simulation(
+        return utils.execute_simulation(
             N,
             particle_radius,
             particle_mass,
