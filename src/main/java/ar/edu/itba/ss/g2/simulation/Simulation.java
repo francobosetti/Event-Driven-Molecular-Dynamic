@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Simulation {
@@ -241,6 +243,20 @@ public class Simulation {
         return (-b + d) / (2 * a);
     }
 
+    private boolean collitionIsInsideDomain(double time, Particle particle) {
+        double fx = particle.getX() + particle.getVx() * time;
+        double fy = particle.getY() + particle.getVy() * time;
+
+        
+        if(isCircularDomain) {
+            double r = domainSize - particle.getRadius();
+            return r*r >= (fx*fx + fy*fy); 
+        }
+
+        double r = particle.getRadius();
+        return (fx > r && fx < domainSize-r && fy > r && fy < domainSize-r); 
+      }
+
     // TODO: Add  circular wall collisions
     private void addParticleCollisions(Particle particle) {
 
@@ -253,12 +269,12 @@ public class Simulation {
 
         } else {
             time = timeToHorizontalWallCollision(particle);
-            if (time != null) {
+            if (time != null && collitionIsInsideDomain(time, particle)) {
                 collisionEventQueue.add(new HorizontalWallEvent(currentTime + time, particle));
             }
 
             time = timeToVerticalWallCollision(particle);
-            if (time != null) {
+            if (time != null && collitionIsInsideDomain(time, particle)) {
                 collisionEventQueue.add(new VerticalWallEvent(currentTime + time, particle));
             }
         }
@@ -279,7 +295,7 @@ public class Simulation {
             }
 
             time = timeToParticleCollision(particle, p2);
-            if (time != null) {
+            if (time != null && collitionIsInsideDomain(time, particle)) {
                 collisionEventQueue.add(new TwoParticleEvent(currentTime + time, particle, p2));
             }
         }
