@@ -130,7 +130,7 @@ public class Simulation {
                 saveSnapshot(currentTime);
             }
 
-            events.add(event);
+            events.add(event.copy());
         }
     }
 

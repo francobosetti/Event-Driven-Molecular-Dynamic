@@ -66,6 +66,11 @@ public class ObstacleEvent extends OneParticleEvent {
     @Override
     public Event copy() {
         Particle particle = getParticles()[0];
-        return new ObstacleEvent(getTime(), new Particle(particle), obstacleX, obstacleY);
+        OneParticleEvent resp = new ObstacleEvent(getTime(), new Particle(particle), obstacleX, obstacleY);
+
+        resp.previousVx = previousVx;
+        resp.previousVy = previousVy;
+
+        return resp;
     }
 }

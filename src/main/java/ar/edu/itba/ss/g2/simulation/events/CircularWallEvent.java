@@ -57,6 +57,11 @@ public class CircularWallEvent extends OneParticleEvent {
     @Override
     public Event copy() {
         Particle particle = getParticles()[0];
-        return new CircularWallEvent(getTime(), new Particle(particle));
+        OneParticleEvent resp = new CircularWallEvent(getTime(), new Particle(particle));
+
+        resp.previousVx = previousVx;
+        resp.previousVy = previousVy;
+
+        return resp;
     }
 }
