@@ -62,7 +62,11 @@ def plot_collision_with_obstacle_vs_time(
 
 
 def plot_collided_particles_count_vs_time(
-    collided_particles_count, labels, limit, text, filename="collided_particles_vs_time.png"
+    collided_particles_count,
+    labels,
+    limit,
+    text,
+    filename="collided_particles_vs_time.png",
 ):
 
     fig, ax = plt.subplots()
@@ -125,7 +129,11 @@ def plot_collided_particles_count_vs_time(
 
 
 def plot_collision_slope_vs_temperature(
-    mean_slopes, std_slopes, temperatures, text, filename="collision_slope_vs_temperature.png"
+    mean_slopes,
+    std_slopes,
+    temperatures,
+    text,
+    filename="collision_slope_vs_temperature.png",
 ):
 
     fig, ax = plt.subplots()
@@ -194,3 +202,66 @@ def plot_time_to_first_collision_vs_temperature(
 
     plt.savefig(filename)
     plt.close()
+
+
+def plot_msd(
+    times, mean_squared_displacement, std_squared_displacement, filename="data/msd.png"
+):
+    plt.figure(figsize=(8, 6))
+    plt.errorbar(
+        times,
+        mean_squared_displacement,
+        yerr=std_squared_displacement,
+        fmt="o",
+        capsize=5,
+    )
+    plt.xlabel("Instante (s)")
+    plt.ylabel("MSD (m$^2$)")
+    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+    plt.grid(True)
+    plt.savefig(filename)
+    plt.close()
+
+
+def plot_msd_with_fit(
+    times,
+    mean_squared_displacement,
+    std_squared_displacement,
+    best_fit_msd,
+    filename="data/msd_fit.png",
+):
+    plt.figure(figsize=(8, 6))
+    plt.errorbar(
+        times,
+        mean_squared_displacement,
+        yerr=std_squared_displacement,
+        fmt="o",
+        capsize=5,
+        label="MSD promedio observado",
+    )
+    plt.plot(times, best_fit_msd, "r-", label=f"y = 2 * D * t")
+    plt.xlabel("Instante (s)")
+    plt.ylabel("MSD (m$^2$)")
+    plt.legend()
+    plt.grid(True)
+    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+    plt.savefig(filename)
+    plt.close()
+
+
+def plot_se_vs_D(D_values, mse_values, best_D, filename="data/mse_vs_D.png"):
+    plt.figure(figsize=(8, 6))
+    plt.plot(D_values, mse_values, marker="o", linestyle="-")
+
+    # Mejor D
+    plt.axvline(best_D, color="r", linestyle="--", label=f"Best D = {best_D:.3e} m^2/s")
+
+    plt.xlabel(r"$D$ (m$^2$/s)")
+    plt.ylabel("Error cuadrático")
+
+    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+    plt.ticklabel_format(style="sci", axis="x", scilimits=(0, 0))
+
+    plt.grid(True)
+
+    plt.savefig(filename)
