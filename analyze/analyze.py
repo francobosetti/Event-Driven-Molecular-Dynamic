@@ -92,24 +92,27 @@ def execute_simulations(
             print(f"Reading simulation on {unique_dir}")
             # Parse the static and dynamic files from the simulation
             static_file = os.path.join(unique_dir, "static.txt")
-            dynamic_file = os.path.join(unique_dir, "dynamic.txt")
+            snapshots_file = os.path.join(unique_dir, "snapshots.txt")
+            events_file = os.path.join(unique_dir, "events.txt")
 
             # Parse static and dynamic files
             parameters = utils.load_static_data(static_file)
-            times, particle_data = utils.load_dynamic_data(
-                dynamic_file, parameters["particle_count"], parameters["event_count"]
+            event_times, events = utils.load_event_data(
+                events_file, parameters["event_count"]
             )
+            snapshot_times, snapshots = utils.load_snapshot_data(
+                snapshots_file, parameters["particle_count"], parameters["snapshot_count"])
 
             print(f"Analyzing simulation on {unique_dir}")
             # TODO: analyze results
             collision_count = utils.get_collision_with_obstacle_count(
-                times, particle_data, obstacle_radius, particle_radius
+                event_times, events
             )
             first_collision_count = utils.get_first_collision_with_obstacle_count(
-                times, particle_data, obstacle_radius, particle_radius
+                event_times, events
             )
             temperature = utils.get_system_temperature(
-                particle_data, parameters["particle_mass"]
+                snapshots, parameters["particle_mass"]
             )
 
             print(f"Collision count: {max(collision_count.values())}")

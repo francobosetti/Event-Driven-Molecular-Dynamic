@@ -16,6 +16,8 @@ public class ObstacleEvent extends OneParticleEvent {
     @Override
     public void resolveCollision() {
         Particle particle = getParticles()[0];
+        previousVx = particle.getVx();
+        previousVy = particle.getVy();
 
         double x = particle.getX();
         double y = particle.getY();
@@ -43,5 +45,27 @@ public class ObstacleEvent extends OneParticleEvent {
         particle.setVy(newVy);
 
         particle.incrementCollisionCount();
+    }
+
+    @Override
+    public String toString() {
+        Particle particle = getParticles()[0];
+        return String.format(
+                "%.5f O %d %5f %5f %5f %5f %5f %5f",
+                getTime(),
+                particle.getId(),
+                particle.getX(),
+                particle.getY(),
+                particle.getVx(),
+                particle.getVy(),
+                previousVx,
+                previousVy
+        );
+    }
+
+    @Override
+    public Event copy() {
+        Particle particle = getParticles()[0];
+        return new ObstacleEvent(getTime(), new Particle(particle), obstacleX, obstacleY);
     }
 }

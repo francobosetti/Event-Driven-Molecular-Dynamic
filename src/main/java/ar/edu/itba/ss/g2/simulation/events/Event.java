@@ -32,4 +32,6 @@ public abstract class Event implements Comparable<Event> {
 
 
     public abstract void resolveCollision();
+
+    public abstract Event copy();
 }

@@ -116,7 +116,7 @@ public class App {
         System.out.println("Simulation finished, writing output...");
 
 
-        Output output = new Output(simulation.getSnapshots(), configuration);
+        Output output = new Output(simulation.getSnapshots(), simulation.getEvents(), configuration);
 
         try {
             FileUtil.serializeOutput(output, configuration.getOutputDirectory());

@@ -3,6 +3,7 @@ package ar.edu.itba.ss.g2.utils;
 import ar.edu.itba.ss.g2.config.Configuration;
 import ar.edu.itba.ss.g2.model.Output;
 import ar.edu.itba.ss.g2.model.Particle;
+import ar.edu.itba.ss.g2.simulation.events.Event;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -54,11 +55,12 @@ public class FileUtil {
                 writer.write(configuration.getObstacleRadius() + "\n");
             }
             writer.write(output.snapshots().size() + "\n");
+            writer.write(output.events().size() + "\n");
         }
 
         // dynamic
         Map<Double, Set<Particle>> snapshots = output.snapshots();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(directory + "/dynamic.txt"), 128 * 1024)) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(directory + "/snapshots.txt"), 128 * 1024)) {
             List<Entry<Double, Set<Particle>>> entries = new ArrayList<>(snapshots.entrySet());
             entries.sort(Comparator.comparingDouble(Entry::getKey));
 
@@ -78,6 +80,13 @@ public class FileUtil {
                                 particle.getVy())
                             );
                 }
+            }
+        }
+
+        List<Event> events = output.events();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(directory + "/events.txt"), 128 * 1024)) {
+            for (Event event : events) {
+                writer.write(event + "\n");
             }
         }
     }

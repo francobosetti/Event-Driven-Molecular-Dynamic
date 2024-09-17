@@ -63,4 +63,23 @@ public class TwoParticleEvent extends Event {
         a.incrementCollisionCount();
         b.incrementCollisionCount();
     }
+
+    @Override
+    public String toString() {
+        Particle a = getParticles()[0];
+        Particle b = getParticles()[1];
+
+        return String.format(
+                "%.5f P %d %5f %5f %5f %5f %d %5f %5f %5f %5f",
+                getTime(), a.getId(), a.getX(), a.getY(), a.getVx(), a.getVy(), b.getId(), b.getX(),
+                b.getY(), b.getVx(), b.getVy());
+    }
+
+    @Override
+    public Event copy() {
+        Particle a = getParticles()[0];
+        Particle b = getParticles()[1];
+
+        return new TwoParticleEvent(getTime(), new Particle(a), new Particle(b));
+    }
 }

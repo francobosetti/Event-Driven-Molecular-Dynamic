@@ -10,6 +10,8 @@ public class CircularWallEvent extends OneParticleEvent {
     @Override
     public void resolveCollision() {
         Particle particle = getParticles()[0];
+        previousVx = particle.getVx();
+        previousVy = particle.getVy();
 
         // alpha: angle between the normal and the x-axis
         // the position versor is the same as the normal versor
@@ -34,5 +36,27 @@ public class CircularWallEvent extends OneParticleEvent {
         particle.setVy(newVy);
 
         particle.incrementCollisionCount();
+    }
+
+    @Override
+    public String toString() {
+        Particle particle = getParticles()[0];
+        return String.format(
+                "%.5f W %d %5f %5f %5f %5f %5f %5f",
+                getTime(),
+                particle.getId(),
+                particle.getX(),
+                particle.getY(),
+                particle.getVx(),
+                particle.getVy(),
+                previousVx,
+                previousVy
+        );
+    }
+
+    @Override
+    public Event copy() {
+        Particle particle = getParticles()[0];
+        return new CircularWallEvent(getTime(), new Particle(particle));
     }
 }
