@@ -111,6 +111,12 @@ def execute_simulations(
             first_collision_count = utils.get_first_collision_with_obstacle_count(
                 event_times, events
             )
+
+            time_slot_duration = 0.5
+            obstacle_pressures, wall_pressures = utils.get_system_pressure(
+                event_times, events, domain_radius, time_slot_duration, particle_mass
+            )
+
             temperature = utils.get_system_temperature(
                 snapshots, parameters["particle_mass"]
             )
@@ -127,6 +133,8 @@ def execute_simulations(
                     "collision_count": collision_count,
                     "first_collision_count": first_collision_count,
                     "temperature": temperature,
+                    "obstacle_pressures": obstacle_pressures,
+                    "wall_pressures": wall_pressures
                 }
             )
 
