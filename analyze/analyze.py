@@ -282,7 +282,7 @@ def plot_results(results, output_dir="data"):
         wall_pressures,
         obstacle_pressures,
         labels,
-        text=text,
+        parameter_text=text,
         time_slot_duration=0.1,
         filename=f"{output_dir}/wall_and_obstacle_pressures_vs_time",
     )

@@ -266,8 +266,8 @@ def plot_se_vs_D(D_values, mse_values, best_D, filename="data/mse_vs_D.png"):
 def plot_pressure_vs_time(
         wall_pressures: list[list[float]],
         obstacle_pressures: list[list[float]],
-        pressure_label,
-        text,
+        speed_labels,
+        parameter_text,
         time_slot_duration: float,
         filename
 ):
@@ -307,7 +307,7 @@ def plot_pressure_vs_time(
         ax.text(
             1.05,
             0.8,
-            text + f"\n{pressure_label[i]}",
+            parameter_text + f"\n{speed_labels[i]}",
             transform=ax.transAxes,
             fontsize=12,
             verticalalignment="top",
