@@ -181,12 +181,6 @@ def plot_results(results, output_dir="data"):
         slope = np.polyfit(times, counts, 1)[0]
         temperature = result["temperature"]
 
-        # Time to all collisions
-        max_time = max(first_collision_count.keys())
-        if first_collision_count[max_time] < first_collision_limit:
-            print(
-                f"Simulation did not complete for v={v}, t={max_time}, count={first_collision_count[max_time]}"
-            )
 
         if temperature not in slopes:
             slopes[temperature] = []
@@ -194,7 +188,17 @@ def plot_results(results, output_dir="data"):
 
         if temperature not in time_to_all_collisions:
             time_to_all_collisions[temperature] = []
-        time_to_all_collisions[temperature].append(float(max_time))
+
+        time_to_limit = 0
+        for time, count in first_collision_count.items():
+            if count == first_collision_limit:
+                time_to_limit = float(time)
+                break
+
+        if time_to_limit == 0:
+            print(f"Could not find time to limit for v={v}")
+
+        time_to_all_collisions[temperature].append(time_to_limit)
 
         if v in found_speeds:
             continue
