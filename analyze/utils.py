@@ -237,7 +237,7 @@ def execute_simulation(
 
     return unique_dir
 
-def get_system_pressure(times, events, domain_radius, time_slot_duration, particle_mass):    
+def get_system_pressure(times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass):    
     collisions_obstacle = get_collisions_with_obstacle(times, events)
     collisions_wall = get_collision_with_wall(times, events)
 
@@ -248,18 +248,18 @@ def get_system_pressure(times, events, domain_radius, time_slot_duration, partic
     current_time_slot = 0
     for time, (_, ((x, y, vx1, vy1, _, _))) in collisions_obstacle.items():
         if time > current_time_slot * time_slot_duration:
-            obstacle_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * domain_radius
+            obstacle_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * obstacle_radius
             current_time_slot += 1
             obstacle_momentums.append(0)
 
         # get normal component
         normal = (x / math.sqrt(x ** 2 + y ** 2), y / math.sqrt(x ** 2 + y ** 2))
 
-        v1_normal = vx1 * normal[0] + vy1 * normal[1]
+        v1_normal = abs(vx1 * normal[0] + vy1 * normal[1])
 
         obstacle_momentums[current_time_slot] += 2 * v1_normal * particle_mass
 
-    obstacle_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * domain_radius
+    obstacle_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * obstacle_radius
 
     # Calculate the momentum of the particles that collide with the wall, dividing them into groups of time_slot_duration
     current_time_slot = 0
@@ -272,7 +272,7 @@ def get_system_pressure(times, events, domain_radius, time_slot_duration, partic
         # get normal component
         normal = (x / math.sqrt(x ** 2 + y ** 2), y / math.sqrt(x ** 2 + y ** 2))
 
-        v1_normal = vx1 * normal[0] + vy1 * normal[1]
+        v1_normal = abs(vx1 * normal[0] + vy1 * normal[1])
 
         wall_momentums[current_time_slot] += 2 * v1_normal * particle_mass
 

@@ -114,7 +114,7 @@ def execute_simulations(
 
             time_slot_duration = 0.5
             obstacle_pressures, wall_pressures = utils.get_system_pressure(
-                event_times, events, domain_radius, time_slot_duration, particle_mass
+                event_times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass
             )
 
             temperature = utils.get_system_temperature(
