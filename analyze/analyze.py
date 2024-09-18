@@ -112,7 +112,7 @@ def execute_simulations(
                 event_times, events, t_max
             )
 
-            time_slot_duration = 0.5
+            time_slot_duration = 0.1
             obstacle_pressures, wall_pressures = utils.get_system_pressure(
                 event_times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass, t_max
             )
@@ -279,22 +279,13 @@ def plot_results(results, output_dir="data"):
     )
 
     plots.plot_pressure_vs_time(
+        wall_pressures,
         obstacle_pressures,
         labels,
         text=text,
-        time_slot_duration=0.5,
-        filename=f"{output_dir}/obstacle_pressure_vs_time.png",
+        time_slot_duration=0.1,
+        filename=f"{output_dir}/wall_and_obstacle_pressures_vs_time",
     )
-
-    plots.plot_pressure_vs_time(
-        wall_pressures,
-        labels,
-        text=text,
-        time_slot_duration=0.5,
-        filename=f"{output_dir}/wall_pressure_vs_time.png",
-    )
-
-
 
 if __name__ == "__main__":
 
@@ -318,9 +309,9 @@ if __name__ == "__main__":
 
         speeds = [1, 3, 6, 10]
 
-        t_max = 10
+        t_max = 1
 
-        repetitions = 10
+        repetitions = 3
 
         is_concurrent = True if len(sys.argv) == 3 else False
         workers = int(sys.argv[2]) if is_concurrent else 4
