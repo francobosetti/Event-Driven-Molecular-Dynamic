@@ -2,7 +2,6 @@ import math
 import os
 import subprocess
 
-
 # Load static configuration
 def load_static_data(static_file):
     with open(static_file, "r") as file:
@@ -237,3 +236,117 @@ def execute_simulation(
         raise e
 
     return unique_dir
+
+def execute_simulation(
+    N,
+    particle_radius,
+    particle_mass,
+    domain_type,
+    domain_radius,
+    obstacle_radius,
+    speed,
+    t_max,
+    repetition,
+    memory_gigs,
+    root_dir="data",
+    obstacle="fixed",
+    om=3,
+    skip=100000000,
+):
+
+    # Create a unique directory based on the parameters
+    name = f"v-{speed}_it-{repetition}"
+    unique_dir = os.path.join(root_dir, name)
+
+    os.makedirs(unique_dir, exist_ok=True)
+
+    # Build the command
+    command = [
+        "java",
+        f"-Xmx{memory_gigs}G",  # Maximum heap size
+        f"-Xms{memory_gigs}G",  # Initial heap size
+        "-jar",
+        "target/event-driven-molecular-dynamics-1.0-SNAPSHOT-jar-with-dependencies.jar",
+        "-obs",
+        str(obstacle),
+        "-om",
+        str(om),
+        "-out",
+        unique_dir,
+        "-N",
+        str(N),
+        "-r",
+        str(particle_radius),
+        "-m",
+        str(particle_mass),
+        "-v",
+        str(speed),
+        "-t",
+        str(t_max),
+        "-sz",
+        str(domain_radius),
+        "-or",
+        str(obstacle_radius),
+        "-d",
+        str(domain_type),
+        "-sk",
+        str(skip)
+    ]
+
+    try:
+        print(f"Running simulation with speed {speed}, repetition {repetition}")
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        print(
+            f"Simulation completed successfully for speed {speed}, repetition {repetition}"
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Simulation failed for speed {speed}, repetition {repetition}")
+        print(f"Error Output: {e.stderr}")
+        raise e
+
+    return unique_dir
+
+
+def get_system_pressure(times, events, domain_radius, time_slot_duration, particle_mass):    
+    collisions_obstacle = get_collisions_with_obstacle(times, events)
+    collisions_wall = get_collision_with_wall(times, events)
+
+    obstacle_momentums = [0]
+    wall_momentums = [0]
+
+    # Calculate the momentum of the particles that collide with the obstacle, dividing them into groups of time_slot_duration
+    current_time_slot = 0
+    for time, (_, ((x, y, vx1, vy1, _, _))) in collisions_obstacle.items():
+        if time > current_time_slot * time_slot_duration:
+            obstacle_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * domain_radius
+            current_time_slot += 1
+            obstacle_momentums.append(0)
+
+        # get normal component
+        normal = (x / math.sqrt(x ** 2 + y ** 2), y / math.sqrt(x ** 2 + y ** 2))
+
+        v1_normal = vx1 * normal[0] + vy1 * normal[1]
+
+        obstacle_momentums[current_time_slot] += 2 * v1_normal * particle_mass
+
+    obstacle_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * domain_radius
+
+    # Calculate the momentum of the particles that collide with the wall, dividing them into groups of time_slot_duration
+    current_time_slot = 0
+    for time, (_, ((x, y, vx1, vy1, _, _))) in collisions_wall.items():
+        if time > current_time_slot * time_slot_duration:
+            wall_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * domain_radius
+            current_time_slot += 1
+            wall_momentums.append(0)
+
+        # get normal component
+        normal = (x / math.sqrt(x ** 2 + y ** 2), y / math.sqrt(x ** 2 + y ** 2))
+
+        v1_normal = vx1 * normal[0] + vy1 * normal[1]
+
+        wall_momentums[current_time_slot] += 2 * v1_normal * particle_mass
+
+    wall_momentums[current_time_slot] /= time_slot_duration * 2 * math.pi * domain_radius
+
+    return obstacle_momentums, wall_momentums
+    
