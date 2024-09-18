@@ -307,7 +307,7 @@ def plot_pressure_vs_time(
         ax.text(
             1.05,
             0.8,
-            text,
+            text + f"\n{pressure_label[i]}",
             transform=ax.transAxes,
             fontsize=12,
             verticalalignment="top",
