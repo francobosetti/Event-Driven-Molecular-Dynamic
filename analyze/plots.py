@@ -265,3 +265,55 @@ def plot_se_vs_D(D_values, mse_values, best_D, filename="data/mse_vs_D.png"):
     plt.grid(True)
 
     plt.savefig(filename)
+
+
+def plot_pressure_vs_time(
+    pressures: list[list[float]], 
+    pressure_label,
+    text, 
+    time_slot_duration:float, 
+    filename
+):
+   # Pressures is a list of list of floats [[pressure1, pressure2, ...], [pressure1, pressure2, ...], ...]
+   # Each pressure value is separated by time_slot_duration
+   # Plot the mean pressure and the standard deviation
+
+    fig, ax = plt.subplots()
+
+    for i, pressure in enumerate(pressures):
+        times = [time_slot_duration * i for i in range(len(pressure))]
+        ax.plot(times, pressure, label=pressure_label[i])
+
+    ax.set_xlabel("Instante (s)")
+    ax.set_ylabel("Presión (Pa)")
+
+    # 10 Ticks
+    max_time = len(pressure) * time_slot_duration
+    step = max_time / 4  # 9 intervals create 10 ticks
+    steps = [round(i * step, 2) for i in range(5)]
+    ax.set_xticks(steps)
+
+    # Shrinks the plot by 20%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    
+    # Put a legend to the right of the current axis
+    ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+
+    # Add text above the legend box (surronded by a box)
+    ax.text(
+        1.05,
+        0.8,
+        text,
+        transform=ax.transAxes,
+        fontsize=12,
+        verticalalignment="top",
+        bbox=dict(facecolor="none", edgecolor="grey", boxstyle="round,pad=0.1"),
+    )
+
+    plt.savefig(filename)
+    plt.close()
+    
+    
+
+    
