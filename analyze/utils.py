@@ -90,23 +90,23 @@ def load_event_data(events_file, event_count):
     return times, events
 
 
-def get_collisions_with_obstacle(times, events):
+def get_collisions_with_obstacle(times, events, t_max):
 
     collision_times = {}
 
     for time, (event_type, particle_id, event_data) in zip(times, events):
-        if event_type == "O":
+        if event_type == "O" and time <= t_max:
             x, y, vx1, vy1, vx2, vy2 = event_data
             collision_times[time] = (particle_id, ((x, y, vx1, vy1, vx2, vy2)))
 
     return collision_times
 
 
-def get_collision_with_wall(times, events):
+def get_collision_with_wall(times, events, t_max):
     collision_times = {}
 
     for time, (event_type, particle_id, event_data) in zip(times, events):
-        if event_type == "W":
+        if event_type == "W" and time <= t_max:
             x, y, vx1, vy1, vx2, vy2 = event_data
             collision_times[time] = (particle_id, ((x, y, vx1, vy1, vx2, vy2)))
 
@@ -114,11 +114,11 @@ def get_collision_with_wall(times, events):
 
 
 def get_collision_with_obstacle_count(
-    times, events
+    times, events, t_max
 ):
 
     collisions = get_collisions_with_obstacle(
-        times, events
+        times, events, t_max
     )
 
     collision_count = {}
@@ -132,11 +132,11 @@ def get_collision_with_obstacle_count(
 
 
 def get_first_collision_with_obstacle_count(
-    times, events
+    times, events, t_max
 ):
 
     collisions = get_collisions_with_obstacle(
-        times, events
+        times, events, t_max
     )
 
     collision_count = {}
@@ -237,9 +237,9 @@ def execute_simulation(
 
     return unique_dir
 
-def get_system_pressure(times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass):    
-    collisions_obstacle = get_collisions_with_obstacle(times, events)
-    collisions_wall = get_collision_with_wall(times, events)
+def get_system_pressure(times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass, t_max):
+    collisions_obstacle = get_collisions_with_obstacle(times, events, t_max)
+    collisions_wall = get_collision_with_wall(times, events, t_max)
 
     obstacle_momentums = [0]
     wall_momentums = [0]

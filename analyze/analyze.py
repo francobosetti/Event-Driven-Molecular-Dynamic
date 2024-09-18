@@ -106,15 +106,15 @@ def execute_simulations(
             print(f"Analyzing simulation on {unique_dir}")
             # TODO: analyze results
             collision_count = utils.get_collision_with_obstacle_count(
-                event_times, events
+                event_times, events, t_max
             )
             first_collision_count = utils.get_first_collision_with_obstacle_count(
-                event_times, events
+                event_times, events, t_max
             )
 
             time_slot_duration = 0.5
             obstacle_pressures, wall_pressures = utils.get_system_pressure(
-                event_times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass
+                event_times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass, t_max
             )
 
             temperature = utils.get_system_temperature(
@@ -318,7 +318,7 @@ if __name__ == "__main__":
 
         speeds = [1, 3, 6, 10]
 
-        t_max = 3
+        t_max = 10
 
         repetitions = 10
 
