@@ -18,6 +18,7 @@ def execute_simulations(
     obstacle_radius,
     speeds,
     t_max,
+    time_slot_duration,
     repetitions,
     root_dir="data",
     is_concurrent=True,
@@ -112,7 +113,6 @@ def execute_simulations(
                 event_times, events, t_max
             )
 
-            time_slot_duration = 0.1
             obstacle_pressures, wall_pressures = utils.get_system_pressure(
                 event_times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass, t_max
             )
@@ -156,7 +156,7 @@ def execute_simulations(
     return results  # Return the parsed results
 
 
-def plot_results(results, output_dir="data"):
+def plot_results(results, time_slot_duration, output_dir="data"):
     # Create a list of collision counts for speeds, ignore repetitions
     found_speeds = set()
     collision_counts_with_obstacle = []
@@ -283,7 +283,7 @@ def plot_results(results, output_dir="data"):
         obstacle_pressures,
         labels,
         parameter_text=text,
-        time_slot_duration=0.1,
+        time_slot_duration=time_slot_duration,
         filename=f"{output_dir}/wall_and_obstacle_pressures_vs_time",
     )
 
@@ -295,6 +295,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python system_behaviour.py <generate|plot> [concurrent_workers] ")
         exit(1)
+
+    time_slot_duration = 0.1
 
     if sys.argv[1] == "generate":
 
@@ -325,6 +327,7 @@ if __name__ == "__main__":
             obstacle_radius,
             speeds,
             t_max,
+            time_slot_duration,
             repetitions,
             root_dir="data",
             is_concurrent=is_concurrent,
@@ -342,7 +345,7 @@ if __name__ == "__main__":
         with open("data/results.json", "r") as json_file:
             results = json.load(json_file)
 
-            plot_results(results, output_dir="data")
+            plot_results(results, time_slot_duration, output_dir="data")
 
     else:
         print("Usage: python analyze.py <generate|plot> [concurrent_workers] ")
