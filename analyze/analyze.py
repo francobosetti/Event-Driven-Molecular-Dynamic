@@ -168,6 +168,9 @@ def plot_results(results, output_dir="data"):
     # Dict of t -> time to all collisions
     time_to_all_collisions = {}
 
+    obstacle_pressures = []
+    wall_pressures = []
+
     N = results[0]["parameters"]["particle_count"]
     first_collision_limit = N * 0.9
     particle_radius = results[0]["parameters"]["particle_radius"]
@@ -216,6 +219,9 @@ def plot_results(results, output_dir="data"):
         collision_counts_with_obstacle.append(collision_count)
         first_collision_counts_with_obstacle.append(first_collision_count)
         labels.append(f"v={v} (m/s)")
+
+        obstacle_pressures.append(result["obstacle_pressures"])
+        wall_pressures.append(result["wall_pressures"])
 
     mean_slopes = []
     std_slopes = []
@@ -271,6 +277,23 @@ def plot_results(results, output_dir="data"):
         text,
         filename=f"{output_dir}/collided_particles_count_vs_time.png",
     )
+
+    plots.plot_pressure_vs_time(
+        obstacle_pressures,
+        labels,
+        text=text,
+        time_slot_duration=0.5,
+        filename=f"{output_dir}/obstacle_pressure_vs_time.png",
+    )
+
+    plots.plot_pressure_vs_time(
+        wall_pressures,
+        labels,
+        text=text,
+        time_slot_duration=0.5,
+        filename=f"{output_dir}/wall_pressure_vs_time.png",
+    )
+
 
 
 if __name__ == "__main__":
