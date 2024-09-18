@@ -115,14 +115,14 @@ if __name__ == "__main__":
         times = times[times < non_stationary_period]
 
         # Range of diffusion coefficients (D values) to test
-        D_values = np.linspace(0, 3e-3, 50)
+        D_values = np.linspace(0, 1e-3, 50)
 
         # Calculo error cuadratico
         se_values = []
         for D in D_values:
 
             # Linea de ajuste
-            predicted_msd = 2 * D * times
+            predicted_msd = 4 * D * times
 
             # Error cuadratico medio
             se = np.sum((mean_squared_displacement - predicted_msd) ** 2)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         best_D = D_values[best_D_index]
 
         
-        best_fit_msd = 2 * best_D * times
+        best_fit_msd = 4 * best_D * times
 
         plots.plot_msd_with_fit(times, mean_squared_displacement, std_squared_displacement, best_fit_msd, "data/msd_fit.png")
         plots.plot_se_vs_D(D_values, mse_values, best_D, "data/mse_vs_D.png")

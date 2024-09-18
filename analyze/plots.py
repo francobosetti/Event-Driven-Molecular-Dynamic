@@ -239,7 +239,7 @@ def plot_msd_with_fit(
         capsize=5,
         label="MSD promedio observado",
     )
-    plt.plot(times, best_fit_msd, "r-", label=f"y = 2 * D * t")
+    plt.plot(times, best_fit_msd, "r-", label=f"y = 4 * D * t")
     plt.xlabel("Instante (s)")
     plt.ylabel("MSD (m$^2$)")
     plt.legend()
