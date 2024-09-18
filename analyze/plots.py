@@ -2,9 +2,8 @@ import matplotlib.pyplot as plt
 
 
 def plot_collision_with_obstacle_vs_time(
-    collision_counts, labels, text, filename="collision_with_obstacle_vs_time.png"
+        collision_counts, labels, text, filename="collision_with_obstacle_vs_time.png"
 ):
-
     fig, ax = plt.subplots()
 
     # Collision counts is a list of dict [time, count].
@@ -62,13 +61,12 @@ def plot_collision_with_obstacle_vs_time(
 
 
 def plot_collided_particles_count_vs_time(
-    collided_particles_count,
-    labels,
-    limit,
-    text,
-    filename="collided_particles_vs_time.png",
+        collided_particles_count,
+        labels,
+        limit,
+        text,
+        filename="collided_particles_vs_time.png",
 ):
-
     fig, ax = plt.subplots()
 
     # Collision counts is a list of dict [time, count].
@@ -129,13 +127,12 @@ def plot_collided_particles_count_vs_time(
 
 
 def plot_collision_slope_vs_temperature(
-    mean_slopes,
-    std_slopes,
-    temperatures,
-    text,
-    filename="collision_slope_vs_temperature.png",
+        mean_slopes,
+        std_slopes,
+        temperatures,
+        text,
+        filename="collision_slope_vs_temperature.png",
 ):
-
     fig, ax = plt.subplots()
 
     ax.errorbar(
@@ -167,13 +164,12 @@ def plot_collision_slope_vs_temperature(
 
 
 def plot_time_to_first_collision_vs_temperature(
-    mean_times,
-    std_times,
-    temperatures,
-    text,
-    filename="time_to_first_collision_vs_temperature.png",
+        mean_times,
+        std_times,
+        temperatures,
+        text,
+        filename="time_to_first_collision_vs_temperature.png",
 ):
-
     fig, ax = plt.subplots()
 
     ax.errorbar(
@@ -205,7 +201,7 @@ def plot_time_to_first_collision_vs_temperature(
 
 
 def plot_msd(
-    times, mean_squared_displacement, std_squared_displacement, filename="data/msd.png"
+        times, mean_squared_displacement, std_squared_displacement, filename="data/msd.png"
 ):
     plt.figure(figsize=(8, 6))
     plt.errorbar(
@@ -224,11 +220,11 @@ def plot_msd(
 
 
 def plot_msd_with_fit(
-    times,
-    mean_squared_displacement,
-    std_squared_displacement,
-    best_fit_msd,
-    filename="data/msd_fit.png",
+        times,
+        mean_squared_displacement,
+        std_squared_displacement,
+        best_fit_msd,
+        filename="data/msd_fit.png",
 ):
     plt.figure(figsize=(8, 6))
     plt.errorbar(
@@ -268,15 +264,15 @@ def plot_se_vs_D(D_values, mse_values, best_D, filename="data/mse_vs_D.png"):
 
 
 def plot_pressure_vs_time(
-    pressures: list[list[float]], 
-    pressure_label,
-    text, 
-    time_slot_duration:float, 
-    filename
+        pressures: list[list[float]],
+        pressure_label,
+        text,
+        time_slot_duration: float,
+        filename
 ):
-   # Pressures is a list of list of floats [[pressure1, pressure2, ...], [pressure1, pressure2, ...], ...]
-   # Each pressure value is separated by time_slot_duration
-   # Plot the mean pressure and the standard deviation
+    # Pressures is a list of list of floats [[pressure1, pressure2, ...], [pressure1, pressure2, ...], ...]
+    # Each pressure value is separated by time_slot_duration
+    # Plot the mean pressure and the standard deviation
 
     fig, ax = plt.subplots()
 
@@ -285,7 +281,7 @@ def plot_pressure_vs_time(
         ax.plot(times, pressure, label=pressure_label[i])
 
     ax.set_xlabel("Instante (s)")
-    ax.set_ylabel("Presión (Pa)")
+    ax.set_ylabel("Presión")
 
     # 10 Ticks
     max_time = len(pressure) * time_slot_duration
@@ -296,7 +292,7 @@ def plot_pressure_vs_time(
     # Shrinks the plot by 20%
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    
+
     # Put a legend to the right of the current axis
     ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
@@ -310,10 +306,7 @@ def plot_pressure_vs_time(
         verticalalignment="top",
         bbox=dict(facecolor="none", edgecolor="grey", boxstyle="round,pad=0.1"),
     )
+    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
 
     plt.savefig(filename)
     plt.close()
-    
-    
-
-    
