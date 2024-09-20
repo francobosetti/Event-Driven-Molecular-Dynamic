@@ -103,19 +103,18 @@ if __name__ == "__main__":
         times = np.loadtxt("data/times.txt")
 
 
-
-        plots.plot_msd(times, mean_squared_displacement, std_squared_displacement, "data/msd.png")
-
-
         # Stationary period from 0.5s, so we split up to 0.5
-        non_stationary_period = 0.5
+        non_stationary_period = 0.4
+
+        plots.plot_msd(times, mean_squared_displacement, std_squared_displacement, non_stationary_period, "data/msd.png")
+
 
         mean_squared_displacement = mean_squared_displacement[times < non_stationary_period]
         std_squared_displacement = std_squared_displacement[times < non_stationary_period]
         times = times[times < non_stationary_period]
 
         # Range of diffusion coefficients (D values) to test
-        D_values = np.linspace(0, 1e-3, 50)
+        D_values = np.linspace(0, 1.1e-3, 50)
 
         # Calculo error cuadratico
         se_values = []
@@ -137,7 +136,7 @@ if __name__ == "__main__":
         
         best_fit_msd = 4 * best_D * times
 
-        plots.plot_msd_with_fit(times, mean_squared_displacement, std_squared_displacement, best_fit_msd, "data/msd_fit.png")
+        plots.plot_msd_with_fit(times, mean_squared_displacement, std_squared_displacement, best_fit_msd, best_D, "data/msd_fit.png")
         plots.plot_se_vs_D(D_values, mse_values, best_D, "data/mse_vs_D.png")
 
         sys.exit(0)

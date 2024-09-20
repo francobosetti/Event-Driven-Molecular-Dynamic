@@ -102,7 +102,33 @@ def execute_simulations(
                 events_file, parameters["event_count"]
             )
             snapshot_times, snapshots = utils.load_snapshot_data(
-                snapshots_file, parameters["particle_count"], parameters["snapshot_count"])
+                snapshots_file,
+                parameters["particle_count"],
+                parameters["snapshot_count"],
+            )
+
+            obstacle_collision_times = utils.get_collisions_with_obstacle(
+                event_times, events, t_max
+            )
+
+            obstacle_collision_times = list(obstacle_collision_times.keys())
+
+            wall_collision_times = utils.get_collision_with_wall(
+                event_times, events, t_max
+            )
+
+            wall_collision_times = list(wall_collision_times.keys())
+
+            wall_collision_frequency = len(wall_collision_times) / max(
+                wall_collision_times
+            )
+            obstacle_collision_frequency = len(obstacle_collision_times) / max(
+                obstacle_collision_times
+            )
+
+            ratio = wall_collision_frequency / obstacle_collision_frequency
+
+            print(f"Wall collision frequency / Obstacle collision frequency: {ratio}")
 
             print(f"Analyzing simulation on {unique_dir}")
             # TODO: analyze results
@@ -114,14 +140,18 @@ def execute_simulations(
             )
 
             obstacle_pressures, wall_pressures = utils.get_system_pressure(
-                event_times, events, domain_radius, obstacle_radius, time_slot_duration, particle_mass, t_max
+                event_times,
+                events,
+                domain_radius,
+                obstacle_radius,
+                time_slot_duration,
+                particle_mass,
+                t_max,
             )
 
             temperature = utils.get_system_temperature(
                 snapshots, parameters["particle_mass"]
             )
-
-            print(f"Collision count: {max(collision_count.values())}")
 
             # 5 digits of precision
             temperature = round(temperature, 5)
@@ -134,7 +164,7 @@ def execute_simulations(
                     "first_collision_count": first_collision_count,
                     "temperature": temperature,
                     "obstacle_pressures": obstacle_pressures,
-                    "wall_pressures": wall_pressures
+                    "wall_pressures": wall_pressures,
                 }
             )
 
@@ -167,6 +197,9 @@ def plot_results(results, time_slot_duration, output_dir="data"):
     slopes = {}
     # Dict of t -> time to all collisions
     time_to_all_collisions = {}
+    # Dict of t -> list of mean pressures
+    mean_pressures = {}
+    std_pressures = {}
 
     obstacle_pressures = []
     wall_pressures = []
@@ -192,7 +225,6 @@ def plot_results(results, time_slot_duration, output_dir="data"):
         slope = np.polyfit(times, counts, 1)[0]
         temperature = result["temperature"]
 
-
         if temperature not in slopes:
             slopes[temperature] = []
         slopes[temperature].append(slope)
@@ -210,6 +242,30 @@ def plot_results(results, time_slot_duration, output_dir="data"):
             print(f"Could not find time to limit for v={v}")
 
         time_to_all_collisions[temperature].append(time_to_limit)
+
+        system_pressures = [
+            (wall_pressure + obstacle_pressure) / 2
+            for wall_pressure, obstacle_pressure in zip(
+                result["wall_pressures"][1:], result["obstacle_pressures"][1:]
+            )
+        ]
+
+        wall_pressure = np.mean(result["wall_pressures"])
+        obstacle_pressure = np.mean(result["obstacle_pressures"])
+        print(
+            f"Wall mean pressure: {wall_pressure}, Obstacle mean pressure: {obstacle_pressure}, Ratio: {wall_pressure / obstacle_pressure if obstacle_pressure != 0 else 0}"
+        )
+
+
+        mean_pressure = np.mean(system_pressures)
+        std_pressure = np.std(system_pressures)
+
+        if temperature not in mean_pressures:
+            mean_pressures[temperature] = []
+            std_pressures[temperature] = []
+
+        mean_pressures[temperature].append(mean_pressure)
+        std_pressures[temperature].append(std_pressure)
 
         if v in found_speeds:
             continue
@@ -278,14 +334,74 @@ def plot_results(results, time_slot_duration, output_dir="data"):
         filename=f"{output_dir}/collided_particles_count_vs_time.png",
     )
 
+    labels_1_3 = [label for label in labels if label == "v=3.0 (m/s)" or label == "v=1.0 (m/s)"]
+    wall_pressure_1_3 = [ wall_pressures[i] for i, label in enumerate(labels) if label == "v=3.0 (m/s)" or label == "v=1.0 (m/s)"]
+    obstacle_pressure_1_3 = [ obstacle_pressures[i] for i, label in enumerate(labels) if label == "v=3.0 (m/s)" or label == "v=1.0 (m/s)"]
+
+    labels_6_10 = [label for label in labels if label == "v=6.0 (m/s)" or label == "v=10.0 (m/s)"]
+    wall_pressure_6_10 = [ wall_pressures[i] for i, label in enumerate(labels) if label == "v=6.0 (m/s)" or label == "v=10.0 (m/s)"]
+    obstacle_pressure_6_10 = [ obstacle_pressures[i] for i, label in enumerate(labels) if label == "v=6.0 (m/s)" or label == "v=10.0 (m/s)"]
+
+    plots.plot_pressure_vs_time(
+        wall_pressure_1_3,
+        obstacle_pressure_1_3,
+        labels_1_3,
+        text,
+        time_slot_duration=time_slot_duration,
+        filename=f"{output_dir}/wall_and_obstacle_pressures_vs_time_1_3.png",
+    )
+
+    plots.plot_pressure_vs_time(
+        wall_pressure_6_10,
+        obstacle_pressure_6_10,
+        labels_6_10,
+        text,
+        time_slot_duration=time_slot_duration,
+        filename=f"{output_dir}/wall_and_obstacle_pressures_vs_time_6_10.png",
+    )
+
     plots.plot_pressure_vs_time(
         wall_pressures,
         obstacle_pressures,
         labels,
-        parameter_text=text,
+        text,
         time_slot_duration=time_slot_duration,
-        filename=f"{output_dir}/wall_and_obstacle_pressures_vs_time",
+        filename=f"{output_dir}/wall_and_obstacle_pressures_vs_time.png",
     )
+
+
+    mean_mean_pressures = []
+    std_mean_pressures = []
+
+    for temperature, pressures, std_pressures in zip(
+        mean_pressures.keys(),
+        mean_pressures.values(),
+        std_pressures.values(),
+    ):
+        mean_total_pressure = np.mean(pressures)
+
+        std_total_pressure = 0
+        for mean_pressure, std_pressure in zip(pressures, std_pressures):
+            std_total_pressure += (
+                std_pressure**2 + (mean_pressure - mean_total_pressure) ** 2
+            )
+
+        std_total_pressure /= len(pressures)
+        std_total_pressure = np.sqrt(std_total_pressure)
+
+        mean_mean_pressures.append(mean_total_pressure)
+        std_mean_pressures.append(std_total_pressure)
+
+
+    # Plot mean pressure vs temperature
+    plots.plot_pressure_vs_temperature(
+        mean_mean_pressures,
+        std_mean_pressures,
+        temperatures,
+        text,
+        filename=f"{output_dir}/mean_pressure_vs_temperature.png",
+    )
+
 
 if __name__ == "__main__":
 
@@ -296,7 +412,7 @@ if __name__ == "__main__":
         print("Usage: python system_behaviour.py <generate|plot> [concurrent_workers] ")
         exit(1)
 
-    time_slot_duration = 0.1
+    time_slot_duration = 0.01
 
     if sys.argv[1] == "generate":
 
@@ -305,15 +421,15 @@ if __name__ == "__main__":
         particle_mass = 1
 
         domain_type = "circular"
-        domain_radius = 0.1 / 2
+        domain_radius = 0.05
 
         obstacle_radius = 0.005
 
         speeds = [1, 3, 6, 10]
 
-        t_max = 1
+        t_max = 10
 
-        repetitions = 3
+        repetitions = 10
 
         is_concurrent = True if len(sys.argv) == 3 else False
         workers = int(sys.argv[2]) if is_concurrent else 4

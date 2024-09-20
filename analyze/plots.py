@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.cm as cm
 
 
 def plot_collision_with_obstacle_vs_time(
@@ -18,7 +20,7 @@ def plot_collision_with_obstacle_vs_time(
 
         ax.plot(times, counts, label=labels[i])
 
-    ax.set_xlabel("Instante (s)")
+    ax.set_xlabel("Tiempo (s)")
     ax.set_ylabel("Colisiones")
 
     # 10 Ticks
@@ -81,7 +83,7 @@ def plot_collided_particles_count_vs_time(
 
         ax.plot(times, counts, label=labels[i])
 
-    ax.set_xlabel("Instante (s)")
+    ax.set_xlabel("Tiempo (s)")
     ax.set_ylabel("Particulas colisionadas")
 
     # 10 Ticks
@@ -146,7 +148,7 @@ def plot_collision_slope_vs_temperature(
     )
 
     ax.set_xlabel("Temperatura (J)")
-    ax.set_ylabel("Pendiente (colisiones / s)")
+    ax.set_ylabel("Frecuencia (colisiones / s)")
 
     # Add text above the legend box (surronded by a box)
     ax.text(
@@ -201,7 +203,7 @@ def plot_time_to_first_collision_vs_temperature(
 
 
 def plot_msd(
-        times, mean_squared_displacement, std_squared_displacement, filename="data/msd.png"
+        times, mean_squared_displacement, std_squared_displacement, non_stationary_period, filename="data/msd.png"
 ):
     plt.figure(figsize=(8, 6))
     plt.errorbar(
@@ -211,8 +213,9 @@ def plot_msd(
         fmt="o",
         capsize=5,
     )
-    plt.xlabel("Instante (s)")
-    plt.ylabel("MSD (m$^2$)")
+    plt.axvline(non_stationary_period, color="r", linestyle="--")
+    plt.xlabel("Tiempo (s)")
+    plt.ylabel("<z$^2$> (m$^2$)")
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     plt.grid(True)
     plt.savefig(filename)
@@ -224,6 +227,7 @@ def plot_msd_with_fit(
         mean_squared_displacement,
         std_squared_displacement,
         best_fit_msd,
+        best_d,
         filename="data/msd_fit.png",
 ):
     plt.figure(figsize=(8, 6))
@@ -233,11 +237,11 @@ def plot_msd_with_fit(
         yerr=std_squared_displacement,
         fmt="o",
         capsize=5,
-        label="MSD promedio observado",
+        label="<z$^2$> observado",
     )
-    plt.plot(times, best_fit_msd, "r-", label=f"y = 4 * D * t")
-    plt.xlabel("Instante (s)")
-    plt.ylabel("MSD (m$^2$)")
+    plt.plot(times, best_fit_msd, "r-", label=f"Ajuste Lineal, D = {best_d:.1e} m$^2$/s")
+    plt.xlabel("Tiempo (s)")
+    plt.ylabel("<z$^2$> (m$^2$)")
     plt.legend()
     plt.grid(True)
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -250,13 +254,15 @@ def plot_se_vs_D(D_values, mse_values, best_D, filename="data/mse_vs_D.png"):
     plt.plot(D_values, mse_values, marker="o", linestyle="-")
 
     # Mejor D
-    plt.axvline(best_D, color="r", linestyle="--", label=f"Best D = {best_D:.3e} m^2/s")
+    plt.axvline(best_D, color="r", linestyle="--", label=f"Mejor D = {best_D:.1e} m$^2$/s")
 
     plt.xlabel(r"$D$ (m$^2$/s)")
-    plt.ylabel("Error cuadrático")
+    plt.ylabel("Error cuadrático (m$^2$)")
 
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     plt.ticklabel_format(style="sci", axis="x", scilimits=(0, 0))
+
+    plt.legend()
 
     plt.grid(True)
 
@@ -266,53 +272,120 @@ def plot_se_vs_D(D_values, mse_values, best_D, filename="data/mse_vs_D.png"):
 def plot_pressure_vs_time(
         wall_pressures: list[list[float]],
         obstacle_pressures: list[list[float]],
-        speed_labels,
-        parameter_text,
+        speed_labels: list[str],
+        parameter_text: str,
         time_slot_duration: float,
-        filename
+        filename: str
 ):
-    # Each pressure value is separated by time_slot_duration
-    # Plot in the same graph the pressures of the wall and the obstacle. Each list of floats corresponds to the same parameters
-    # If I have 3 sets of parameters, there will be 3 lists in wall_pressures and 3 lists in obstacle_pressures
-    # The time will be the same for all the sets of parameters, and it will be calculated as time_slot_duration * i for each i in range(len(wall_pressure))
-    # If there are 3 sets of parameters, 3 plots need to be outputed. Each plot will contain the pressures of the wall and the obstacle for the same set of parameters
-    # The x axis will be the time, and the y axis will be the pressure
+    # Number of time steps
+    num_timesteps = len(wall_pressures[0])
+    time = np.arange(0, num_timesteps * time_slot_duration, time_slot_duration)
 
-    for i in range(len(wall_pressures)):
-        fig, ax = plt.subplots()
+    if len(wall_pressures[0]) != len(time):
+        time = time[:-1]
+    
+    # Number of speed groups
+    num_speeds = len(wall_pressures)
+    
+    # Use a colormap with more contrast
+    cmap = cm.get_cmap('Paired')  # Use Set1 for higher contrast
 
-        times = [time_slot_duration * i for i in range(len(wall_pressures[i]))]
+    plt.figure(figsize=(10, 6))
 
-        ax.plot(times, wall_pressures[i], label="Pared")
-        ax.plot(times, obstacle_pressures[i], label="Obstáculo")
+    # Store line objects for custom grouped legends by speed
+    lines = []
+    labels = []
 
-        ax.set_xlabel("Tiempo (s)")
-        ax.set_ylabel("Presión (N/m)")
+    
+    for i in range(num_speeds):
 
-        # 10 Ticks
-        max_time = max(times)
-        min_time = min(times)
-        step = (max_time - min_time) / 4
-        steps = [round(min_time + i * step, 2) for i in range(5)]
-        ax.set_xticks(steps)
+        if "v=10.0 (m/s)" in speed_labels:
+            light_color = cmap(2 * i + 4)
+            dark_color = cmap(2 * i + 5)
+        else:
+            # Darker color for wall pressure
+            light_color = cmap(2*i)
+            dark_color = cmap(2*i + 1)
 
-        # Shrinks the plot by 20%
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        # Plot inner pressure
+        inner_line, = plt.plot(time, obstacle_pressures[i], label=f"{speed_labels[i]} Obs.", color=light_color, linewidth=2)
+        # Plot wall pressure
+        wall_line, = plt.plot(time, wall_pressures[i], label=f"{speed_labels[i]} Pared", color=dark_color, linewidth=2)
 
-        # Put a legend to the right of the current axis
-        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        lines.append(inner_line)
+        lines.append(wall_line)
 
-        # Add text above the legend box (surronded by a box)
-        ax.text(
-            1.05,
-            0.8,
-            parameter_text + f"\n{speed_labels[i]}",
-            transform=ax.transAxes,
-            fontsize=12,
-            verticalalignment="top",
-            bbox=dict(facecolor="none", edgecolor="grey", boxstyle="round,pad=0.1"),
-        )
+        labels.append(f"{speed_labels[i]} Obs.")
+        labels.append(f"{speed_labels[i]} Pared")
 
-        plt.savefig(f"{filename}_{i}.png")
-        plt.close()
+
+
+    
+    plt.xlabel('Tiempo (s)')
+    plt.ylabel('Presión (N/m)')
+    plt.grid(True)
+
+    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+
+
+    # Add text above the legend box (surronded by a box)
+
+    ax = plt.gca()
+
+    # Shrinks the plot by 20%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+    ax.text(
+        1.05,
+        0.85,
+        parameter_text,
+        transform=ax.transAxes,
+        fontsize=12,
+        verticalalignment="top",
+        bbox=dict(facecolor="none", edgecolor="grey", boxstyle="round,pad=0.1"),
+    )
+    # Custom grouped legend by speed, combining wall and inner pressures
+    plt.legend(lines[::-1], labels[::-1], loc='center left', bbox_to_anchor=(1, 0.5))
+
+    # Save the figure to file
+    plt.savefig(filename)
+    plt.close()
+
+def plot_pressure_vs_temperature(
+        mean_pressures,
+        std_pressures,
+        temperatures,
+        text,
+        filename="pressure_vs_temperature.png",
+):
+    fig, ax = plt.subplots()
+
+    ax.errorbar(
+        temperatures,
+        mean_pressures,
+        yerr=std_pressures,
+        fmt="o",
+        ecolor="black",
+        capsize=5,
+        elinewidth=1,
+    )
+
+    ax.set_xlabel("Temperatura (J)")
+    ax.set_ylabel("Presión (N/m)")
+
+    # Add text above the legend box (surronded by a box)
+    ax.text(
+        0.8,
+        0.17,
+        text,
+        transform=ax.transAxes,
+        fontsize=12,
+        verticalalignment="top",
+        bbox=dict(facecolor="none", edgecolor="grey", boxstyle="round,pad=0.2"),
+    )
+
+    plt.savefig(filename)
+    plt.close()
+
+
