@@ -223,12 +223,10 @@ public class Simulation {
 
         
         if(isCircularDomain) {
-            double r = domainSize - particle.getRadius();
-            return r*r >= (fx*fx + fy*fy); 
+            return domainSize*domainSize >= (fx*fx + fy*fy); 
         }
 
-        double r = particle.getRadius();
-        return (fx > r && fx < domainSize-r && fy > r && fy < domainSize-r); 
+        return (fx > 0 && fx < domainSize && fy > 0 && fy < domainSize); 
       }
 
     // TODO: Add  circular wall collisions
